@@ -127,6 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Collaboration.cpp" />
+    <ClCompile Include="CollaborativeTask.cpp" />
     <ClCompile Include="Dashboard.cpp" />
     <ClCompile Include="DatePool.cpp" />
     <ClCompile Include="MyString.cpp" />
@@ -136,11 +138,14 @@
     <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collaboration.h" />
+    <ClInclude Include="CollaborativeTask.h" />
     <ClInclude Include="Container.hpp" />
     <ClInclude Include="Dashboard.h" />
     <ClInclude Include="DatePool.h" />
     <ClInclude Include="MyString.h" />
     <ClInclude Include="Optional.hpp" />
+    <ClInclude Include="SharedPtr.hpp" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="TasksCollection.h" />
     <ClInclude Include="TaskStatus.h" />

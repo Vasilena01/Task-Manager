@@ -36,6 +36,12 @@
     <ClCompile Include="Dashboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Collaboration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollaborativeTask.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyString.h">
@@ -66,6 +72,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dashboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collaboration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollaborativeTask.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

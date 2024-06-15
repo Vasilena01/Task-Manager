@@ -1,19 +1,25 @@
 #pragma once
 #include "MyString.h"
+#include "Vector.hpp"
+#include "SharedPtr.hpp"
 #include "Task.h"
 #include "Dashboard.h"
-//#include "Container.hpp"
-#include "Vector.hpp"
+#include "TasksCollection.h"
+#include "Collaboration.h"
 
 class User
 {
 public:
-	Task& getTaskByID(unsigned id);
+	/*Task& getTaskByID(unsigned id);
 	const Task& getTaskByID(unsigned id) const;
-	Task& getTaskByName(const MyString& name);
+	Task& getTaskByName(const MyString& name);*/
+	SharedPtr<Task> getTaskByID(unsigned id);
+	const SharedPtr<Task> getTaskByID(unsigned id) const;
+	SharedPtr<Task> getTaskByName(const MyString& name);
 
 	void addTask(const MyString& name, const Optional<MyString>& due_date, const MyString& description);
 	void addTask(const MyString& name, const MyString& description);
+	void addTask(SharedPtr<Task> task);
 	void updateTaskName(unsigned id, const MyString& newName);
 	void updateTaskDescription(unsigned id, const MyString& newDescription);
 	void startTask(unsigned id);
@@ -32,7 +38,9 @@ public:
 private:
 	MyString username;
 	MyString password;
-	Vector<Task> tasks;
+	//Vector<Task> tasks;
+	TasksCollection tasks;
 	Dashboard dashboard;
+	//Vector<SharedPtr<Collaboration>> collaborations;
 };
 

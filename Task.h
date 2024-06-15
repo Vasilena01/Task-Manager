@@ -5,6 +5,7 @@
 #include "MyString.h"
 #include "TaskStatus.h"
 #include "DatePool.h"
+#include "SharedPtr.hpp"
 
 class Task
 {
@@ -24,7 +25,10 @@ public:
 	void setStatus(const Status& newStatus);
 
 	void printTask() const;
-	//virtual ~Task() = default;
+	virtual SharedPtr<Task> clone() const;
+	/*Task* clone(const MyString& name, const Optional<MyString>& due_date, const MyString& description) const;
+	Task* clone(const MyString& name, const MyString& description) const;*/
+	virtual ~Task() = default;
 private:
 	unsigned id;
 	MyString taskName;

@@ -70,6 +70,22 @@ void Task::printTask() const
 	std::cout << "DESCRIPTION: " << description << std::endl;
 }
 
+SharedPtr<Task> Task::clone() const
+{
+	SharedPtr<Task> newTask(new Task(*this));
+	return newTask;
+}
+
+//Task* Task::clone(const MyString& name, const Optional<MyString>& due_date, const MyString& description) const
+//{
+//	return new Task(name, due_date, description);
+//}
+//
+//Task* Task::clone(const MyString& name, const MyString& description) const
+//{
+//	return new Task(name, description);
+//}
+
 void Task::printDate() const
 {
 	try {
