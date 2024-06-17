@@ -13,9 +13,8 @@ public:
 	TasksCollection(TasksCollection&& other) noexcept;
 	TasksCollection& operator=(TasksCollection&& other) noexcept;
 
-	//void addTask(const MyString& name, const MyString& due_date, const MyString& description);
-	void addTask(const SharedPtr<Task>& task);
-	//void addTask(const Task& task);
+	void addTask(SharedPtr<Task> task);
+	void addTask(const Task& task);
 
 	size_t getSize() const;
 

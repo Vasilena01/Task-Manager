@@ -37,7 +37,7 @@ TasksCollection& TasksCollection::operator=(TasksCollection&& other) noexcept
 	return *this;
 }
 
-void TasksCollection::addTask(const SharedPtr<Task>& task)
+void TasksCollection::addTask(SharedPtr<Task> task)
 {
 	if (size == capacity)
 		resize(capacity * 2);
@@ -45,22 +45,11 @@ void TasksCollection::addTask(const SharedPtr<Task>& task)
 	data[size++] = task;
 }
 
-//void TasksCollection::addTask(const Task& task)
-//{
-//	SharedPtr<Task> cloned = nullptr;
-//
-//	if (task.getName() != nullptr && task.getDescription() != nullptr)
-//	{
-//		if (task.getDate().isFilled())
-//			cloned = task.clone(task.getName(), task.getDate(), task.getDescription());
-//		else
-//			cloned = task.clone(task.getName(), task.getDescription());
-//	}
-//	else
-//		cloned = task.clone();
-//
-//	addTask(cloned);
-//}
+void TasksCollection::addTask(const Task& task)
+{
+	SharedPtr<Task> cloned = task.clone();
+	addTask(cloned);
+}
 
 TasksCollection::~TasksCollection()
 {
