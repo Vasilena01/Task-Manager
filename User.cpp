@@ -1,51 +1,22 @@
 #include "User.h"
 
-//Task& User::getTaskByID(unsigned id)
-//{
-//    for (int i = 0; i < tasks.getSize(); i++)
-//    {
-//        if (tasks[i] != nullptr && tasks[i]->getId() == id)
-//            return *tasks[i];
-//    }
-//
-//    throw std::logic_error("There is no task with the given ID!");
-//}
-//
-//const Task& User::getTaskByID(unsigned id) const
-//{
-//    for (int i = 0; i < tasks.getSize(); i++)
-//    {
-//        if (tasks[i] != nullptr && tasks[i]->getId() == id)
-//            return *tasks[i];
-//    }
-//
-//    throw std::logic_error("There is no task with the given ID!");
-//}
-//
-//Task& User::getTaskByName(const MyString& name)
-//{
-//    SharedPtr<Task> taskToReturn = nullptr;
-//
-//    for (int i = 0; i < tasks.getSize(); i++)
-//    {
-//        if (tasks[i] != nullptr && tasks[i]->getName() == name)
-//        {
-//            if (taskToReturn == nullptr || tasks[i]->getId() < taskToReturn->getId())
-//            {
-//                taskToReturn = tasks[i];
-//            }
-//        }
-//    }
-//
-//    if (taskToReturn == nullptr)
-//    {
-//        throw std::runtime_error("No task found with the given name!");
-//    }
-//
-//    return *taskToReturn;
-//}
+User::User() : username(MyString()), password(MyString())
+{}
 
-SharedPtr<Task> User::getTaskByID(unsigned id)
+User::User(const MyString& username, const MyString& password) : username(username), password(password)
+{}
+
+MyString User::getUsername() const
+{
+    return username;
+}
+
+MyString User::getPassword() const
+{
+    return password;
+}
+
+Task* User::getTaskByID(unsigned id)
 {
     for (int i = 0; i < tasks.getSize(); i++)
     {
@@ -56,20 +27,9 @@ SharedPtr<Task> User::getTaskByID(unsigned id)
     throw std::logic_error("There is no task with the given ID!");
 }
 
-const SharedPtr<Task> User::getTaskByID(unsigned id) const
+Task* User::getTaskByName(const MyString& name)
 {
-    for (int i = 0; i < tasks.getSize(); i++)
-    {
-        if (tasks[i] != nullptr && tasks[i]->getId() == id)
-            return tasks[i];
-    }
-
-    throw std::logic_error("There is no task with the given ID!");
-}
-
-SharedPtr<Task> User::getTaskByName(const MyString& name)
-{
-    SharedPtr<Task> taskToReturn = nullptr;
+    Task* taskToReturn = nullptr;
 
     for (int i = 0; i < tasks.getSize(); i++)
     {
@@ -90,19 +50,21 @@ SharedPtr<Task> User::getTaskByName(const MyString& name)
     return taskToReturn;
 }
 
-void User::addTask(const MyString& name, const Optional<MyString>& due_date, const MyString& description)
+void User::addTask(const MyString& name, const Optional<std::tm>& due_date, const MyString& description)
 {
     for (int i = 0; i < tasks.getSize(); i++)
     {
-        if (tasks[i] != nullptr && tasks[i]->getName() == name && tasks[i]->getDate() == due_date && tasks[i]->getDescription() == description)
+        if (tasks[i] != nullptr && tasks[i]->getName() == name 
+            && GlobalFunctions::compareDates(tasks[i]->getDate(), due_date.getValue())
+            && tasks[i]->getDescription() == description)
+        {
             throw std::logic_error("This task already exists!");
+        }
     }
 
-    SharedPtr<Task> newTask(new Task(name, due_date, description)); 
+    Task newTask(name, due_date, description); 
+    newTask.printTask();
     tasks.addTask(newTask);
-    /*Task newTask(name, due_date, description);
-    tasks.addTask(newTask);*/
-    //tasks.pushBack(newTask);
 }
 
 void User::addTask(const MyString& name, const MyString& description)
@@ -113,14 +75,11 @@ void User::addTask(const MyString& name, const MyString& description)
             throw std::logic_error("This task already exists!");
     }
 
-    SharedPtr<Task> newTask(new Task(name, description)); 
+    Task newTask(name, description);
     tasks.addTask(newTask);
-    /*Task newTask(name, description);
-    tasks.addTask(newTask);*/
-    //tasks.pushBack(newTask);
 }
 
-void User::addTask(SharedPtr<Task> task)
+void User::addTask(Task* task)
 {
     for (size_t i = 0; i < tasks.getSize(); ++i)
     {
@@ -135,34 +94,25 @@ void User::addTask(SharedPtr<Task> task)
 
 void User::updateTaskName(unsigned id, const MyString& newName)
 {
-    /*Task& task = getTaskByID(id);
-    task.setName(newName);*/
-
-    SharedPtr<Task> task = getTaskByID(id);
+    Task* task = getTaskByID(id);
     task->setName(newName);
 }
 
 void User::updateTaskDescription(unsigned id, const MyString& newDescription)
 {
-    /*Task& task = getTaskByID(id);
-    task.setDescription(newDescription);*/
-    SharedPtr<Task> task = getTaskByID(id);
+    Task* task = getTaskByID(id);
     task->setDescription(newDescription);
 }
 
 void User::startTask(unsigned id)
 {
-    /*Task& task = getTaskByID(id);
-    task.setStatus(Status::IN_PROCESS);*/
-    SharedPtr<Task> task = getTaskByID(id);
+    Task* task = getTaskByID(id);
     task->setStatus(Status::IN_PROCESS);
 }
 
 void User::finishTask(unsigned id)
 {
-   /* Task& task = getTaskByID(id);
-    task.setStatus(Status::DONE);*/
-    SharedPtr<Task> task = getTaskByID(id);
+    Task* task = getTaskByID(id);
     task->setStatus(Status::DONE);
 }
 
@@ -172,45 +122,41 @@ void User::deleteTask(unsigned id)
     if(dashboard.isTaskInDashboard(id))
         dashboard.removeTask(id);
 
-    for (int i = 0; i < tasks.getSize(); i++)
-    {
-        if (tasks[i] != nullptr && tasks[i]->getId() == id)
-        {
-            tasks[i] = nullptr;
-            return;
-        }
-        //tasks.popAt(i);
-    }
-    throw std::logic_error("There is no task with the given ID!");
+    tasks.removeTask(id);
+    //for (int i = 0; i < tasks.getSize(); i++)
+    //{
+    //    if (tasks[i] != nullptr && tasks[i]->getId() == id)
+    //    {
+    //        delete tasks[i];
+    //        // TODO da se opravi, uj tasks[i] bilo const...
+    //        //tasks[i] = nullptr;
+    //        return;            
+    //    }
+    //}
+    //throw std::logic_error("There is no task with the given ID!");
 }
 
 void User::listTask(unsigned id)
 {
-    /*Task& task = getTaskByID(id);
-    task.printTask();*/
-    SharedPtr<Task> task = getTaskByID(id);
+    Task* task = getTaskByID(id);
     task->printTask();
 }
 
 void User::listTask(const MyString& name)
 {
-   /* Task& task = getTaskByName(name);
-    task.printTask();*/
-    SharedPtr<Task> task = getTaskByName(name);
+    Task* task = getTaskByName(name);
     task->printTask();
 }
 
 void User::addTaskToDashboard(unsigned id)
 {
-    //Task& task = getTaskByID(id);
-    SharedPtr<Task> task = getTaskByID(id);
-    //task->printTask();
+    Task* task = getTaskByID(id);
 
     if (task->getStatus() != Status::OVERDUE)
-        dashboard.addTask(task);
+        dashboard.addTask(task->clone());
 }
 
-void User::listDashboard() const
+void User::listDashboard()
 {
     dashboard.listTasks();
 }
@@ -220,16 +166,18 @@ void User::removeTaskFromDashboard(unsigned id)
     dashboard.removeTask(id);
 }
 
-void User::listTasks(const Optional<MyString>& due_date) const
+void User::listTasks(const Optional<std::tm>& due_date)
 {
     for (int i = 0; i < tasks.getSize(); i++)
     {
-        if(tasks[i] != nullptr && tasks[i]->getDate() == due_date)
+        if(tasks[i] != nullptr 
+            && GlobalFunctions::compareDates(tasks[i]->getDate(), due_date.getValue())) {
             tasks[i]->printTask();
+        }
     }
 }
 
-void User::listCompletedTasks() const
+void User::listCompletedTasks()
 {
     for (int i = 0; i < tasks.getSize(); i++)
     {
@@ -238,11 +186,26 @@ void User::listCompletedTasks() const
     }
 }
 
-void User::listTasks() const
+void User::listTasks()
 {
-    for (int i = 0; i < tasks.getSize(); i++)
+    if (tasks.getSize())
     {
-        if(tasks[i] != nullptr)
-            tasks[i]->printTask();
+        for (int i = 0; i < tasks.getSize(); i++)
+        {
+            if (tasks[i] != nullptr)
+                tasks[i]->printTask();
+        }
     }
+    throw std::runtime_error("This user has no tasks!");
 }
+
+TasksCollection User::getTasks() const
+{
+    return tasks;
+}
+
+Dashboard User::getDashboard() const
+{
+    return dashboard;
+}
+

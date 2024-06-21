@@ -4,35 +4,32 @@
 #include "Optional.hpp"
 #include "MyString.h"
 #include "TaskStatus.h"
-#include "DatePool.h"
-#include "SharedPtr.hpp"
 
 class Task
 {
 public:
 	Task() = default;
-	Task(const MyString& name, const Optional<MyString>& due_date, const MyString& description);
+	Task(const MyString& name, const Optional<std::tm>& due_date, const MyString& description);
 	Task(const MyString& name, const MyString& description);
 
 	unsigned getId() const;
 	MyString getName() const;
-	Optional<MyString> getDate() const;
+	Optional<std::tm> getDate() const;
 	Status getStatus() const;
 	MyString getDescription() const;
 
+	void setId(unsigned newId);
 	void setName(const MyString& newName);
 	void setDescription(const MyString& newDescription);
 	void setStatus(const Status& newStatus);
 
 	void printTask() const;
-	virtual SharedPtr<Task> clone() const;
-	/*Task* clone(const MyString& name, const Optional<MyString>& due_date, const MyString& description) const;
-	Task* clone(const MyString& name, const MyString& description) const;*/
+	virtual Task* clone() const;
 	virtual ~Task() = default;
 private:
 	unsigned id;
 	MyString taskName;
-	Optional<MyString> due_date;
+	Optional<std::tm> due_date;
 	Status status;
 	MyString description;
 

@@ -2,7 +2,7 @@
 
 unsigned Task::nextId = 0;
 
-Task::Task(const MyString& name, const Optional<MyString>& due_date, const MyString& description) : Task(name, description)
+Task::Task(const MyString& name, const Optional<std::tm>& due_date, const MyString& description) : Task(name, description)
 {
 	this->due_date = due_date;
 }
@@ -25,7 +25,7 @@ MyString Task::getName() const
 	return taskName;
 }
 
-Optional<MyString> Task::getDate() const
+Optional<std::tm> Task::getDate() const
 {
 	return due_date;
 }
@@ -38,6 +38,11 @@ Status Task::getStatus() const
 MyString Task::getDescription() const
 {
 	return description;
+}
+
+void Task::setId(unsigned newId)
+{
+	id = newId;
 }
 
 void Task::setName(const MyString& newName)
@@ -70,26 +75,15 @@ void Task::printTask() const
 	std::cout << "DESCRIPTION: " << description << std::endl;
 }
 
-SharedPtr<Task> Task::clone() const
+Task* Task::clone() const
 {
-	SharedPtr<Task> newTask(new Task(*this));
-	return newTask;
+	return new Task(*this);
 }
-
-//Task* Task::clone(const MyString& name, const Optional<MyString>& due_date, const MyString& description) const
-//{
-//	return new Task(name, due_date, description);
-//}
-//
-//Task* Task::clone(const MyString& name, const MyString& description) const
-//{
-//	return new Task(name, description);
-//}
 
 void Task::printDate() const
 {
 	try {
-		std::tm tm = DatePool::getInstance().getOrAddDate(due_date.getValue());
+		std::tm tm = due_date.getValue();
 		std::time_t time = std::mktime(&tm);
 
 		if (time != -1) {

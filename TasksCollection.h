@@ -1,33 +1,40 @@
 #pragma once
 #include "Task.h"
-#include "SharedPtr.hpp"
 
 class TasksCollection
 {
 public:
 	TasksCollection();
+
 	TasksCollection(const TasksCollection& other);
 	TasksCollection& operator=(const TasksCollection& other);
-	~TasksCollection();
 
 	TasksCollection(TasksCollection&& other) noexcept;
 	TasksCollection& operator=(TasksCollection&& other) noexcept;
 
-	void addTask(SharedPtr<Task> task);
+	~TasksCollection();
+
+	void readTasksFromFile(const char* filename);
+
+	void addTask(Task* task);
 	void addTask(const Task& task);
+
+	void removeTask(unsigned id);
 
 	size_t getSize() const;
 
-	SharedPtr<Task>& operator[](unsigned index);
-	const SharedPtr<Task> operator[](unsigned index) const;
+	Task* getTaskById(unsigned id);
+
+	const Task* operator[] (unsigned index) const;
+	Task* operator[] (unsigned index);
 private:
-	SharedPtr<Task>* data;
-	size_t size;
+	Task** tasks;
+	size_t tasksCount;
 	size_t capacity;
 
 	void free();
 	void copyFrom(const TasksCollection& other);
 	void moveFrom(TasksCollection&& other);
-	void resize(unsigned newCap);
+	void resize();
 };
 

@@ -1,10 +1,13 @@
 #include "TasksCollection.h"
+#include <fstream>
 
 TasksCollection::TasksCollection()
 {
 	capacity = 8;
-	data = new SharedPtr<Task> [capacity] {nullptr};
-	size = 0;
+	tasksCount = 0;
+	tasks = new Task * [capacity];
+
+	//fill the collection
 }
 
 TasksCollection::TasksCollection(const TasksCollection& other)
@@ -19,6 +22,7 @@ TasksCollection& TasksCollection::operator=(const TasksCollection& other)
 		free();
 		copyFrom(other);
 	}
+
 	return *this;
 }
 
@@ -37,86 +41,108 @@ TasksCollection& TasksCollection::operator=(TasksCollection&& other) noexcept
 	return *this;
 }
 
-void TasksCollection::addTask(SharedPtr<Task> task)
-{
-	if (size == capacity)
-		resize(capacity * 2);
-
-	data[size++] = task;
-}
-
-void TasksCollection::addTask(const Task& task)
-{
-	SharedPtr<Task> cloned = task.clone();
-	addTask(cloned);
-}
-
 TasksCollection::~TasksCollection()
 {
 	free();
 }
 
+void TasksCollection::readTasksFromFile(const char* filename)
+{
+
+}
+
+
+void TasksCollection::addTask(Task* task)
+{
+	if(tasksCount == capacity)
+		resize();
+
+	//Should it be really deep copy here??
+	tasks[tasksCount++] = task->clone();
+	task = nullptr;
+}
+
+void TasksCollection::addTask(const Task& task)
+{
+	Task* cloned = task.clone();
+	addTask(cloned);
+}
+
+void TasksCollection::removeTask(unsigned id)
+{
+	for (size_t i = 0; i < tasksCount; i++) {
+		if (tasks[i] != nullptr && tasks[i]->getId() == id) {
+			delete tasks[i];
+			tasks[i] = nullptr;
+			return;
+		}
+	}
+	throw std::logic_error("There is no task with the given ID!");
+}
+
 size_t TasksCollection::getSize() const
 {
-	return size;
+	return tasksCount;
 }
 
-SharedPtr<Task>& TasksCollection::operator[](unsigned index)
+const Task* TasksCollection::operator[] (unsigned index) const
 {
-	if (index >= size) {
-		throw std::out_of_range("Index out of range");
-	}
-
-	return data[index];
+	return tasks[index];
 }
 
-const SharedPtr<Task> TasksCollection::operator[](unsigned index) const
+Task* TasksCollection::operator[] (unsigned index)
 {
-	if (index >= size) {
-		throw std::out_of_range("Index out of range");
-	}
-
-	return data[index];
+	return tasks[index];
 }
 
 void TasksCollection::free()
 {
-	// shared_ptr will automatically handle memory management, no need to delete manually
-	
-	delete[] data;
-	data = nullptr;
-	size = 0;
-	capacity = 0;
+	for (size_t i = 0; i < tasksCount; i++)
+		delete tasks[i];
+	delete[] tasks;
 }
 
 void TasksCollection::copyFrom(const TasksCollection& other)
 {
-	data = new SharedPtr<Task> [other.capacity];
-
-	for (int i = 0; i < other.size; i++)
-		data[i] = SharedPtr<Task>(other.data[i]->clone());
-
-	size = other.size;
+	tasks = new Task * [other.capacity];
+	tasksCount = other.tasksCount;
 	capacity = other.capacity;
+
+	for (size_t i = 0; i < tasksCount; i++)
+	{
+		Task* cloned = other.tasks[i]->clone();
+		if (cloned)
+			tasks[i] = cloned;
+	}
 }
 
 void TasksCollection::moveFrom(TasksCollection&& other)
 {
-	data = other.data;
-	other.data = nullptr;
-
-	size = other.size;
+	tasksCount = other.tasksCount;
 	capacity = other.capacity;
 
-	other.size = other.capacity = 0;
+	tasks = other.tasks;
+	other.tasks = nullptr;
+
+	other.tasksCount = other.capacity = 0;
 }
 
-void TasksCollection::resize(unsigned newCap)
+void TasksCollection::resize()
 {
-	SharedPtr<Task>* newData = new SharedPtr<Task>[newCap];
-	for (int i = 0; i < size; i++)
-		newData[i] = data[i];
-	delete[] data;
-	data = newData;
-	capacity = newCap;
+	Task** newCollection = new Task * [capacity *= 2];
+	for (size_t i = 0; i < tasksCount; i++)
+		newCollection[i] = tasks[i];
+	delete[] tasks;
+	tasks = newCollection;
+}
+
+Task* TasksCollection::getTaskById(unsigned id)
+{
+	for (size_t i = 0; i < tasksCount; i++)
+	{
+		if (tasks[i]->getId() == id)
+			return tasks[i];
+	}
+
+	return nullptr;
 }

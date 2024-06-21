@@ -1,2 +1,7 @@
-﻿  Task Manager.cpp
+﻿  Session.cpp
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(244,31): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(284,46): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(296,30): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(399,11): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
   Task Manager.vcxproj -> D:\Projects\C++\Task Manager - OOP project\Task Manager\x64\Debug\Task Manager.exe

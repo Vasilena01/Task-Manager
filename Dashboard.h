@@ -1,19 +1,20 @@
 #pragma once
 #include <iostream>
-#include "SharedPtr.hpp"
+#include "GlobalFunctions.h"
 #include "Task.h"
-//#include "Vector.hpp"
 #include "TasksCollection.h"
 
 class Dashboard
 {
 public:
+	Dashboard() = default;
+
 	bool isTaskInDashboard(unsigned id);
-	void addTask(SharedPtr<Task> task);
+	void addTask(Task* task);
 	void removeTask(unsigned id);
-	void listTasks() const;
+	void listTasks();
+	TasksCollection getTasks() const;
 private:
-	//Vector<Task> tasks;
 	TasksCollection tasks;
 };
 

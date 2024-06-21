@@ -55,6 +55,8 @@ public:
 	SharedPtr(SharedPtr<T>&& other);
 	SharedPtr& operator=(SharedPtr<T>&& other);
 
+	explicit operator bool() const;
+
 	const T& operator*() const;
 	T& operator*();
 	const T* operator->() const;
@@ -142,6 +144,12 @@ SharedPtr<T>& SharedPtr<T>::operator=(SharedPtr<T>&& other)
 		moveFrom(std::move(other));
 	}
 	return *this;
+}
+
+template<typename T>
+SharedPtr<T>::operator bool() const
+{
+	return data != nullptr;
 }
 
 template <typename T>
