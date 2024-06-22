@@ -24,13 +24,12 @@ public:
 private:
 	UniquePtr<User> currentUser;
 	Vector<User> allUsers;
-	//TasksCollection allTasks;
 	//Vector<Collaboration> allCollaborations;
 
 	void loadUsers(const char* fileName);
 	void saveUsers(const char* fileName) const;
 	void saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount);
-	void loadTasks(const MyString& fileName) const;
+	//void loadTasks(const MyString& fileName) const;
 	/*void loadCollaborations(const MyString& fileName);
 	void saveCollaborations(const MyString& fileName) const;*/
 

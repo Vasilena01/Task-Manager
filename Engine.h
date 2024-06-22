@@ -17,6 +17,7 @@ private:
     void handleLogout();
     void handleExit();
     void handleAddTask(const MyString& name, const std::tm& due_date, const MyString& description);
+    void handleAddTask(const MyString& name, const MyString& description);
     void handleUpdateTaskName(unsigned id, const MyString& name);
     void handleStartTask(unsigned id);
     void handleUpdateTaskDescription(unsigned id, const MyString& description);
@@ -25,6 +26,7 @@ private:
     void handleDeleteTask(unsigned id);
     //void handleGetTask(const MyString& identifier);
     void handleListTasks(const std::tm& due_date);
+    void handleListTasks();
     void handleListCompletedTasks();
     void handleListDashboard();
     void handleFinishTask(unsigned id);
@@ -36,6 +38,7 @@ private:
     void handleListCollaborationTasks(const MyString& collabName);*/
 
     bool isDateFilled(const std::tm& date);
+    bool isValidDate(const char* dateStr);
     std::tm parseDate(const char* dateStr);
 };
 

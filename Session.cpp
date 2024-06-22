@@ -54,6 +54,7 @@ void Session::logout()
 		int index = findUserIndexByUsername(currentUser->getUsername());
 		if (index != -1)
 		{
+			// Deep copy
 			allUsers[index] = *currentUser;
 		}
 		else {
@@ -73,6 +74,7 @@ void Session::exit()
 		int index = findUserIndexByUsername(currentUser->getUsername());
 		if (index != -1)
 		{
+			// Deep copy
 			allUsers[index] = *currentUser;
 		}
 	}
@@ -80,16 +82,12 @@ void Session::exit()
 	try
 	{
 		saveUsers("users.dat");
-		//TODO - remove listTasks()
-		
-		//currentUser->listTasks();
 	}
 	catch (std::exception& e)
 	{
 		std::cout << e.what();
 	}
 	
-	//saveTasks("tasks.dat");
 	//saveCollaborations("collaborations.dat");
 	std::cout << "Session ended. All data saved." << std::endl;
 }
@@ -169,7 +167,7 @@ void Session::loadUsers(const char* fileName)
 			file.read((char*)(&taskStatus), sizeof(taskStatus));
 
 			// Read description
-			size_t descriptionLength = 0;
+			size_t descriptionLength;
 			file.read((char*)(&descriptionLength), sizeof(descriptionLength));
 
 			char* description = new char[descriptionLength + 1];
@@ -263,6 +261,10 @@ void Session::saveUsers(const char* fileName) const
 				file.write((const char*)&hasDueDate, sizeof(hasDueDate));
 				file.write((const char*)&due_date, sizeof(due_date));
 			}
+			else
+			{
+				file.write((const char*)&hasDueDate, sizeof(hasDueDate));
+			}
 
 			// Write task status
 			Status taskStatus = task->getStatus();
@@ -276,12 +278,13 @@ void Session::saveUsers(const char* fileName) const
 		}
 
 		// Write number of dashboard tasks
-		size_t dashboardTaskCount = allUsers[i].getDashboard().getTasks().getSize();
+		TasksCollection currUserDashboardTasks = allUsers[i].getDashboard().getTasks();
+		size_t dashboardTaskCount = currUserDashboardTasks.getSize();
 		file.write((const char*)(&dashboardTaskCount), sizeof(dashboardTaskCount));
 
 		// Write dashboard task IDs
 		for (size_t j = 0; j < dashboardTaskCount; j++) {
-			const Task* dashboardTask = currUserTasks[j];
+			const Task* dashboardTask = currUserDashboardTasks[j];
 
 			unsigned dashboardTaskId = dashboardTask->getId();
 			file.write((const char*)(&dashboardTaskId), sizeof(dashboardTaskId));
@@ -394,7 +397,7 @@ bool Session::areDatesEqual(const std::tm& date1, const std::tm& date2) {
 }
 
 int Session::findUserIndexByUsername(const MyString& username) {
-	for (size_t i = 0; i < allUsers.getSize(); ++i) {
+	for (size_t i = 0; i < allUsers.getSize(); i++) {
 		if (allUsers[i].getUsername() == username) {
 			return i;
 		}

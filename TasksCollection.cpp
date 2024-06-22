@@ -54,7 +54,7 @@ void TasksCollection::readTasksFromFile(const char* filename)
 
 void TasksCollection::addTask(Task* task)
 {
-	if(tasksCount == capacity)
+	if (tasksCount == capacity)
 		resize();
 
 	//Should it be really deep copy here??
@@ -70,14 +70,19 @@ void TasksCollection::addTask(const Task& task)
 
 void TasksCollection::removeTask(unsigned id)
 {
+	bool isThereATaskToDelete = false;
 	for (size_t i = 0; i < tasksCount; i++) {
 		if (tasks[i] != nullptr && tasks[i]->getId() == id) {
 			delete tasks[i];
 			tasks[i] = nullptr;
+			tasksCount--;
+			isThereATaskToDelete = true;
 			return;
 		}
 	}
-	throw std::logic_error("There is no task with the given ID!");
+
+	if (!isThereATaskToDelete)
+		throw std::logic_error("There is no task with the given ID!");
 }
 
 size_t TasksCollection::getSize() const
@@ -110,9 +115,12 @@ void TasksCollection::copyFrom(const TasksCollection& other)
 
 	for (size_t i = 0; i < tasksCount; i++)
 	{
-		Task* cloned = other.tasks[i]->clone();
-		if (cloned)
-			tasks[i] = cloned;
+		if (other.tasks[i] != nullptr)
+		{
+			Task* cloned = other.tasks[i]->clone();
+			if (cloned)
+				tasks[i] = cloned;
+		}
 	}
 }
 

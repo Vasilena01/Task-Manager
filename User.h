@@ -11,6 +11,9 @@ class User
 {
 public:
 	User();
+	User(const User& other);
+	User& operator=(const User& other);
+
 	User(const MyString& username, const MyString& password);
 	MyString getUsername() const;
 	MyString getPassword() const;

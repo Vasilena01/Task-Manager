@@ -80,20 +80,34 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 	else if (strcmp(buff, "add-task") == 0)
 	{
 		// TODO handle the case when the due_date is optional...how to read it
-		char name[GlobalConstants::BUFF_SIZE], due_date_str[GlobalConstants::BUFF_SIZE], description[128];
-		ss >> name >> due_date_str;
-		ss.ignore();
-		ss.getline(description, sizeof(description));
+		char name[GlobalConstants::BUFF_SIZE];
+		char due_date_str[GlobalConstants::BUFF_SIZE];
+		char description[GlobalConstants::BUFF_SIZE];
+		ss >> name;
 
-		std::tm due_date = {};
-		try {
-			due_date = parseDate(due_date_str);
+		ss >> due_date_str;
+
+		if (isValidDate(due_date_str))
+		{
+			std::tm due_date = {};
+			try {
+				due_date = parseDate(due_date_str);
+			}
+			catch (const std::exception& e) {
+				std::cerr << "Error: " << e.what() << std::endl;
+				return;
+			}
+			ss.getline(description, sizeof(description));
+			handleAddTask(name, due_date, description);
 		}
-		catch (const std::exception& e) {
-			std::cerr << "Error: " << e.what() << std::endl;
-			return;
+		else
+		{
+			ss.clear();
+			ss.seekg(std::ios::beg); // Rewind to read everything after the name
+			ss.ignore(std::numeric_limits<std::streamsize>::max(), ' '); // Skip the command part
+			ss.getline(description, sizeof(description));
+			handleAddTask(name, description);
 		}
-		handleAddTask(name, due_date, description);
 	}
 	else if (strcmp(buff, "update-task-name") == 0)
 	{
@@ -142,7 +156,7 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 		/*char identifier[GlobalConstants::BUFF_SIZE];
 		ss >> identifier;
 		handleGetTask(identifier);*/
-		UniquePtr<User> currentUser = session.getCurrentUser();
+		User* currentUser = session.getCurrentUser();
 		if (currentUser)
 		{
 			try
@@ -152,7 +166,7 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 				if (ss.fail())
 					throw std::runtime_error("Invalid id!");
 
-				currentUser->getTaskByID(taskId);
+				currentUser->listTask(taskId);
 			}
 			catch (const std::exception& e)
 			{
@@ -169,7 +183,7 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 				MyString name(remainder);
 				name = name.substr(0, remainingSymbolsCount);
 
-				currentUser->getTaskByName(name);
+				currentUser->listTask(name);
 			}
 		}
 		else
@@ -182,16 +196,17 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 		char due_date_str[GlobalConstants::BUFF_SIZE];
 		ss >> due_date_str;
 
-		std::tm due_date = {};
-		try {
-			due_date = parseDate(due_date_str);
-		}
-		catch (const std::exception& e) {
-			std::cerr << "Error: " << e.what() << std::endl;
-			return;
-		}
+		if (isValidDate(due_date_str))
+		{
+			std::tm due_date = {};
 
-		handleListTasks(due_date);
+			due_date = parseDate(due_date_str);
+			handleListTasks(due_date);
+		}
+		else
+		{
+			handleListTasks();
+		}
 	}
 	else if (strcmp(buff, "list-completed-tasks") == 0)
 	{
@@ -276,23 +291,72 @@ void Engine::handleAddTask(const MyString& name, const std::tm& due_date, const 
 	}
 }
 
+void Engine::handleAddTask(const MyString& name, const MyString& description)
+{
+	try
+	{
+		User* currentUser = session.getCurrentUser();
+		if (!currentUser)
+		{
+			throw std::runtime_error("No user logged in.");
+		}
+
+		if (name.getSize() == 0)
+		{
+			throw std::invalid_argument("Task name cannot be empty.");
+		}
+
+		currentUser->addTask(name, description);
+
+		std::cout << "Task added successfully!" << std::endl;
+	}
+	catch (const std::logic_error& e)
+	{
+		std::cerr << "Logic error while adding task: " << e.what() << std::endl;
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "Runtime error while adding task: " << e.what() << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "An error occurred while adding task: " << e.what() << std::endl;
+	}
+}
+
 void Engine::handleUpdateTaskName(unsigned id, const MyString& name)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
-	if (currentUser)
+	std::cout << id << name;
+	try
 	{
-		currentUser->updateTaskName(id, name);
-		std::cout << "Name set successfully!" << std::endl;
+		User* currentUser= session.getCurrentUser();
+		if (currentUser)
+		{
+			currentUser->updateTaskName(id, name);
+			std::cout << "Name set successfully!" << std::endl;
+		}
+		else
+		{
+			std::cerr << "No user logged in." << std::endl;
+		}
 	}
-	else
+	catch (const std::logic_error& e)
 	{
-		std::cerr << "No user logged in." << std::endl;
+		std::cerr << e.what() << std::endl;
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
 	}
 }
 
 void Engine::handleStartTask(unsigned id)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->startTask(id);
@@ -306,7 +370,7 @@ void Engine::handleStartTask(unsigned id)
 
 void Engine::handleUpdateTaskDescription(unsigned id, const MyString& description)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->updateTaskDescription(id, description);
@@ -320,7 +384,7 @@ void Engine::handleUpdateTaskDescription(unsigned id, const MyString& descriptio
 
 void Engine::handleRemoveTaskFromDashboard(unsigned id)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->removeTaskFromDashboard(id);
@@ -334,7 +398,7 @@ void Engine::handleRemoveTaskFromDashboard(unsigned id)
 
 void Engine::handleAddTaskToDashboard(unsigned id)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->addTaskToDashboard(id);
@@ -348,7 +412,7 @@ void Engine::handleAddTaskToDashboard(unsigned id)
 
 void Engine::handleDeleteTask(unsigned id)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->deleteTask(id);
@@ -417,13 +481,23 @@ void Engine::handleDeleteTask(unsigned id)
 
 void Engine::handleListTasks(const std::tm& due_date)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
-		if (isDateFilled(due_date))
-			currentUser->listTasks(due_date);
-		else
-			currentUser->listTasks();
+		currentUser->listTasks(due_date);
+	}
+	else
+	{
+		std::cerr << "No user logged in." << std::endl;
+	}
+}
+
+void Engine::handleListTasks()
+{
+	User* currentUser = session.getCurrentUser();
+	if (currentUser)
+	{
+		currentUser->listTasks();
 	}
 	else
 	{
@@ -433,7 +507,7 @@ void Engine::handleListTasks(const std::tm& due_date)
 
 void Engine::handleListCompletedTasks()
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->listCompletedTasks();
@@ -446,7 +520,7 @@ void Engine::handleListCompletedTasks()
 
 void Engine::handleListDashboard()
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->listDashboard();
@@ -459,7 +533,7 @@ void Engine::handleListDashboard()
 
 void Engine::handleFinishTask(unsigned id)
 {
-	UniquePtr<User> currentUser = session.getCurrentUser();
+	User* currentUser = session.getCurrentUser();
 	if (currentUser)
 	{
 		currentUser->finishTask(id);
@@ -470,6 +544,7 @@ void Engine::handleFinishTask(unsigned id)
 	}
 }
 
+/*Handle Collabs functions*/
 //void Engine::handleAddCollaboration(const MyString& name)
 //{
 //}
@@ -498,6 +573,17 @@ bool Engine::isDateFilled(const std::tm& date)
 	return (date.tm_year != 0 || date.tm_mon != 0 || date.tm_mday != 0);
 }
 
+bool Engine::isValidDate(const char* dateStr)
+{
+	try {
+		parseDate(dateStr);
+		return true;
+	}
+	catch (...) {
+		return false;
+	}
+}
+
 std::tm Engine::parseDate(const char* dateStr)
 {
 	std::tm tm = {};
@@ -505,12 +591,12 @@ std::tm Engine::parseDate(const char* dateStr)
 		throw std::runtime_error("Failed to parse date: " + std::string(dateStr));
 	}
 
-	tm.tm_year -= 1900; 
-	tm.tm_mon -= 1;     
+	tm.tm_year -= 1900;
+	tm.tm_mon -= 1;
 	tm.tm_hour = 0;
 	tm.tm_min = 0;
 	tm.tm_sec = 0;
-	tm.tm_isdst = -1;   
+	tm.tm_isdst = -1;
 	return tm;
 }
 
