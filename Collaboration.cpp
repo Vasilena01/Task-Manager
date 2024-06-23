@@ -2,7 +2,7 @@
 
 unsigned Collaboration::nexCollabtId = 0;
 
-Collaboration::Collaboration(const MyString& name, const User& creator) : name(name), creator(creator)
+Collaboration::Collaboration(const MyString& name, User* creator) : name(name), creator(creator)
 {
     collabId = nexCollabtId++;
 }
@@ -17,12 +17,12 @@ MyString Collaboration::getName() const
     return name;
 }
 
-User Collaboration::getCreator() const
+User* Collaboration::getCreator() const
 {
     return creator;
 }
 
-Vector<User> Collaboration::getUsers()
+Vector<User*> Collaboration::getUsers()
 {
     return users;
 }
@@ -42,7 +42,7 @@ void Collaboration::setName(const MyString& newName)
     name = newName;
 }
 
-void Collaboration::setCreator(const User& newCreator)
+void Collaboration::setCreator(User* newCreator)
 {
     creator = newCreator;
 }
@@ -51,23 +51,28 @@ bool Collaboration::isUserInCollaboration(const MyString& username) const
 {
     for (int i = 0; i < users.getSize(); i++)
     {
-        if (users[i].getUsername() == username)
+        if (users[i]->getUsername() == username)
             return true;
     }
-    return creator.getUsername() == username;
+    return creator->getUsername() == username;
 }
 
-void Collaboration::addUser(const User& user)
+void Collaboration::addUser(User* user)
 {
     users.pushBack(user);
 }
 
 void Collaboration::addTask(const Task& task)
 {
-    tasks.addTask(task.clone());
+    tasks.addTask(task);
 }
 
-void Collaboration::deleteCollaboration()
+void Collaboration::addTask(Task* task)
+{
+    tasks.addTask(task);
+}
+
+void Collaboration::deleteTasksInCollaboration()
 {
     for (int i = 0; i < tasks.getSize(); i++)
     {
@@ -81,9 +86,9 @@ void Collaboration::deleteTaskFromAllUsers(unsigned taskId)
 {
     for (int i = 0; i < users.getSize(); i++)
     {
-        if (users[i].getTaskByID(taskId) != nullptr)
+        if (users[i]->getTaskByID(taskId) != nullptr)
         {
-            users[i].deleteTask(taskId);
+            users[i]->deleteTask(taskId);
         }
     }
 }

@@ -47,7 +47,6 @@ bool Session::login(const MyString& username, const MyString& password)
 
 void Session::logout()
 {
-	//Updating the allUsers collection when loging out
 	if (currentUser)
 	{
 		std::cout << "Logged out: " << currentUser->getUsername() << std::endl;
@@ -80,17 +79,22 @@ void Session::exit()
 // Collaborations methods
 void Session::addCollaboration(const MyString& name)
 {
-	Collaboration newCollaboration(name, *currentUser);
-	allCollaborations.pushBack(&newCollaboration);
+	Collaboration* newCollaboration = new Collaboration(name, currentUser);
+	allCollaborations.pushBack(newCollaboration);
 }
 
 void Session::deleteCollaboration(const MyString& name)
 {
-	Collaboration& collaboration = getCollaborationByName(name);
-	if (currentUser->getUsername() != collaboration.getCreator().getUsername())
+	Collaboration* collaboration = getCollaborationByName(name);
+	if (currentUser->getUsername() != collaboration->getCreator()->getUsername())
 		throw std::logic_error("Only the creator of the collaboration can delete it!");
 
-	collaboration.deleteCollaboration();
+	// First dealing with deleting all tasks in collab and in its usersTasks collection
+	collaboration->deleteTasksInCollaboration();
+
+	// Dealing with deleting the whole collaboration
+	int indexInCollabsArr = getCollabIndexById(collaboration->getId());
+	allCollaborations.popAt(indexInCollabsArr);
 }
 
 void Session::listCollaborations() const
@@ -107,27 +111,27 @@ void Session::listCollaborations() const
 
 void Session::addUserToCollaboration(const MyString& collabName, const MyString& username)
 {
-	Collaboration& collaboration = getCollaborationByName(collabName);
-	User& newUser = getUserByUsername(username);
-	collaboration.addUser(newUser);
+	Collaboration* collaboration = getCollaborationByName(collabName);
+	User* newUser = getUserByUsername(username);
+	collaboration->addUser(newUser);
 }
 
 void Session::assignTaskInCollaboration(const MyString& collabName, const MyString& username, const MyString& name, const std::tm& dueDate, const MyString& description)
 {
-	Collaboration& collaboration = getCollaborationByName(collabName);
-	User& assignee = getUserByUsername(username);
+	Collaboration* collaboration = getCollaborationByName(collabName);
+	User* assignee = getUserByUsername(username);
 
 	Task* taskForUser = new CollaborativeTask(name, dueDate, description, username);
 
-	collaboration.addTask(*taskForUser);
-	collaboration.addUser(assignee);
-	assignee.addTask(taskForUser);	
+	collaboration->addTask(taskForUser);
+	collaboration->addUser(assignee);
+	assignee->addTask(taskForUser);	
 }
 
 void Session::listCollabTasks(const MyString& name)
 {
-	Collaboration& collaboration = getCollaborationByName(name);
-	collaboration.listTasks();
+	Collaboration* collaboration = getCollaborationByName(name);
+	collaboration->listTasks();
 }
 
 User* Session::getCurrentUser() const
@@ -379,8 +383,6 @@ void Session::loadCollaborations(const MyString& fileName)
 		throw std::runtime_error("Failed to open file for reading!");
 
 	while (true) {
-		Collaboration collab;
-
 		// Read ID
 		unsigned collabId = 0;
 		file.read((char*)(&collabId), sizeof(collabId));
@@ -402,7 +404,10 @@ void Session::loadCollaborations(const MyString& fileName)
 		char* creatorUsername = new char[creatorNameLength + 1];
 		file.read(creatorUsername, creatorNameLength);
 		creatorUsername[creatorNameLength] = '\0';
-		User& creator = getUserByUsername(creatorUsername);
+		User* creator = getUserByUsername(creatorUsername);
+
+		// Creating a new collab based on collabName and the creator
+		Collaboration* collab = new Collaboration(MyString(collabName), creator);
 
 		// Read Users
 		size_t usernamesCount;
@@ -415,8 +420,8 @@ void Session::loadCollaborations(const MyString& fileName)
 			file.read(username, userNameLength);
 			username[userNameLength] = '\0';
 
-			User& user = getUserByUsername(username);
-			collab.addUser(user);
+			User* user = getUserByUsername(username);
+			collab->addUser(user);
 
 			delete[] username;
 		}
@@ -431,20 +436,16 @@ void Session::loadCollaborations(const MyString& fileName)
 			Task* task = getTaskById(taskId);
 
 			if (task) {
-				collab.addTask(*task);
+				collab->addTask(task);
 				delete task;
 			}
 		}
-
-		collab.setId(collabId);
-		collab.setName(MyString(collabName));
-		collab.setCreator(creator);
 
 		delete[] collabName;
 		delete[] creatorUsername;
 
 		// Assuming allCollaborations is a global or member variable.
-		allCollaborations.pushBack(&collab);
+		allCollaborations.pushBack(collab);
 	}
 }
 
@@ -466,18 +467,18 @@ void Session::saveCollaborations(const MyString& fileName) const
 		file.write(collabName.c_str(), nameLength);
 
 		// Write creator username
-		const MyString& creatorName = allCollaborations[i]->getCreator().getUsername();
+		const MyString& creatorName = allCollaborations[i]->getCreator()->getUsername();
 		size_t creatorNameLength = creatorName.getSize();
 		file.write((const char*)(&creatorNameLength), sizeof(creatorNameLength));
 		file.write(creatorName.c_str(), creatorNameLength);
 
 		// Write collab users
-		Vector<User> collabUsers = allCollaborations[i]->getUsers();
+		Vector<User*> collabUsers = allCollaborations[i]->getUsers();
 		size_t usernamesCount = collabUsers.getSize();
 		file.write((const char*)&usernamesCount, sizeof(usernamesCount));
 
 		for (int j = 0; j < usernamesCount; j++) {
-			const MyString& username = collabUsers[j].getUsername();
+			const MyString& username = collabUsers[j]->getUsername();
 			size_t usernameLength = username.getSize();
 			file.write((const char*)(&usernameLength), sizeof(usernameLength));
 			file.write(username.c_str(), usernameLength);
@@ -526,23 +527,20 @@ bool Session::areDatesEqual(const std::tm& date1, const std::tm& date2) {
 	return (date1.tm_year == date2.tm_year && date1.tm_mon == date2.tm_mon && date1.tm_mday == date2.tm_mday);
 }
 
-int Session::findUserIndexByUsername(const MyString& username) {
-	for (size_t i = 0; i < allUsers.getSize(); i++) {
-		if (allUsers[i]->getUsername() == username) {
-			return i;
-		}
-	}
-	return -1; // User not found
-}
-
-User& Session::getUserByUsername(const MyString& name) const
+User* Session::getUserByUsername(const MyString& name)
 {
+	bool isFound = 0;
 	for (int i = 0; i < allUsers.getSize(); i++)
 	{
 		if (allUsers[i]->getUsername() == name)
-			return (*allUsers[i]);
+		{
+			isFound = 1;
+			return allUsers[i];
+		}
 	}
-	throw std::logic_error("No user with the given username!");
+
+	if(!isFound)
+		throw std::logic_error("No user with the given username!");
 }
 
 Task* Session::getTaskById(unsigned id)
@@ -550,12 +548,25 @@ Task* Session::getTaskById(unsigned id)
 	return allTasks.getTaskById(id);
 }
 
-Collaboration& Session::getCollaborationByName(const MyString& name)
+Collaboration* Session::getCollaborationByName(const MyString& name)
 {
+	bool isFound = 0;
 	for (int i = 0; i < allCollaborations.getSize(); i++)
 	{
 		if (allCollaborations[i]->getName() == name)
-			return (*allCollaborations[i]);
+			return allCollaborations[i];
 	}
-	throw std::logic_error("No collaboration with the given name was found!");
+
+	if(!isFound)
+		throw std::logic_error("No collaboration with the given name was found!");
+}
+
+int Session::getCollabIndexById(unsigned id)
+{
+	for (int i = 0; i < allCollaborations.getSize(); i++)
+	{
+		if (allCollaborations[i]->getId() == id)
+			return i;
+	}
+	return -1;
 }
