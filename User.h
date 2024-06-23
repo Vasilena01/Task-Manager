@@ -5,7 +5,6 @@
 #include "Task.h"
 #include "Dashboard.h"
 #include "TasksCollection.h"
-#include "Collaboration.h"
 
 class User
 {

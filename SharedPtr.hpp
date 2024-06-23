@@ -61,27 +61,44 @@ public:
 	T& operator*();
 	const T* operator->() const;
 	T* operator->();
-        
+
 	bool isInitlized() const;
 	bool operator==(const SharedPtr<T>& other) const;
 	bool operator!=(const SharedPtr<T>& other) const;
-	
+
+	void reset();
+
 	~SharedPtr();
 };
 
 template <typename T>
 void SharedPtr<T>::free()
 {
-	if(data == nullptr && counter == nullptr)
+	if (data == nullptr && counter == nullptr)
 		return;
 
 	counter->removeSharedPtr();
 
-	if (counter->useCount == 0) 
+	if (counter->useCount == 0)
 		delete data;
 
 	if (counter->weakCount == 0)
 		delete counter;
+}
+
+
+template <typename T>
+void SharedPtr<T>::reset() {
+	if (data) {
+		counter->useCount--;
+		if (counter->useCount == 0) {
+			delete data;
+			delete counter;
+		}
+
+		data = nullptr;
+		counter = new Counter();
+	}
 }
 
 template <typename T>
@@ -109,7 +126,7 @@ SharedPtr<T>::SharedPtr(T* data)
 		counter = new Counter();
 		counter->addSharedPtr();
 	}
-	else 
+	else
 	{
 		counter = nullptr;
 	}
@@ -118,7 +135,7 @@ SharedPtr<T>::SharedPtr(T* data)
 template <typename T>
 SharedPtr<T>::SharedPtr(const SharedPtr<T>& other)
 {
-	copyFrom(other); 
+	copyFrom(other);
 }
 
 template <typename T>
@@ -166,7 +183,7 @@ SharedPtr<T>& SharedPtr<T>::operator=(const SharedPtr<T>& other)
 template <typename T>
 const T& SharedPtr<T>::operator*() const
 {
-	if(data == nullptr)
+	if (data == nullptr)
 	{
 		throw std::runtime_error("Pointer not set");
 	}
@@ -176,7 +193,7 @@ const T& SharedPtr<T>::operator*() const
 template <typename T>
 T& SharedPtr<T>::operator*()
 {
-	if(data == nullptr)
+	if (data == nullptr)
 	{
 		throw std::runtime_error("Pointer not set");
 	}

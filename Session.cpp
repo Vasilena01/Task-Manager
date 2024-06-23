@@ -4,8 +4,7 @@
 Session::Session()
 {
 	loadUsers("users.dat");
-	/*loadTasks("tasks.dat");
-	loadCollaborations("collaborations.dat");*/
+	loadCollaborations("collaborations.dat");
 }
 
 Session::~Session()
@@ -17,7 +16,7 @@ void Session::registerUser(const MyString& username, const MyString& password)
 {
 	for (size_t i = 0; i < allUsers.getSize(); i++)
 	{
-		if (allUsers[i].getUsername() == username)
+		if (allUsers[i]->getUsername() == username)
 		{
 			std::cerr << "User already exists." << std::endl;
 			return;
@@ -26,7 +25,7 @@ void Session::registerUser(const MyString& username, const MyString& password)
 	}
 
 	User newUser(username, password);
-	allUsers.pushBack(newUser);
+	allUsers.pushBack(&newUser);
 
 	std::cout << "Registered successfully!" << std::endl;
 }
@@ -35,9 +34,9 @@ bool Session::login(const MyString& username, const MyString& password)
 {
 	for (size_t i = 0; i < allUsers.getSize(); i++)
 	{
-		if (allUsers[i].getUsername() == username && allUsers[i].getPassword() == password)
+		if (allUsers[i]->getUsername() == username && allUsers[i]->getPassword() == password)
 		{
-			currentUser = UniquePtr<User>(new User(allUsers[i]));
+			currentUser = allUsers[i];
 			std::cout << "Welcome back, " << username << "!" << std::endl;
 			return true;
 		}
@@ -51,16 +50,6 @@ void Session::logout()
 	//Updating the allUsers collection when loging out
 	if (currentUser)
 	{
-		int index = findUserIndexByUsername(currentUser->getUsername());
-		if (index != -1)
-		{
-			// Deep copy
-			allUsers[index] = *currentUser;
-		}
-		else {
-			std::cerr << "User not found in the user list!" << std::endl;
-		}
-
 		std::cout << "Logged out: " << currentUser->getUsername() << std::endl;
 		currentUser = nullptr;
 	}
@@ -71,35 +60,79 @@ void Session::exit()
 
 	if (currentUser)
 	{
-		int index = findUserIndexByUsername(currentUser->getUsername());
-		if (index != -1)
-		{
-			// Deep copy
-			allUsers[index] = *currentUser;
-		}
+		currentUser = nullptr;
 	}
 
 	try
 	{
 		saveUsers("users.dat");
+		saveCollaborations("collaborations.dat");
 	}
 	catch (std::exception& e)
 	{
 		std::cout << e.what();
 	}
-	
+
 	//saveCollaborations("collaborations.dat");
 	std::cout << "Session ended. All data saved." << std::endl;
 }
 
-User* Session::getCurrentUser() const
+// Collaborations methods
+void Session::addCollaboration(const MyString& name)
 {
-	return currentUser.getPtr();
+	Collaboration newCollaboration(name, *currentUser);
+	allCollaborations.pushBack(&newCollaboration);
 }
 
-Vector<User> Session::getAllUsers() const
+void Session::deleteCollaboration(const MyString& name)
 {
-	return allUsers;
+	Collaboration& collaboration = getCollaborationByName(name);
+	if (currentUser->getUsername() != collaboration.getCreator().getUsername())
+		throw std::logic_error("Only the creator of the collaboration can delete it!");
+
+	collaboration.deleteCollaboration();
+}
+
+void Session::listCollaborations() const
+{
+	for (int i = 0; i < allCollaborations.getSize(); i++)
+	{
+		// Checking if the currentUser is the creator or is part of the collabUsers
+		if (allCollaborations[i]->isUserInCollaboration(currentUser->getUsername()))
+		{
+			std::cout << allCollaborations[i]->getName() << std::endl;
+		}
+	}
+}
+
+void Session::addUserToCollaboration(const MyString& collabName, const MyString& username)
+{
+	Collaboration& collaboration = getCollaborationByName(collabName);
+	User& newUser = getUserByUsername(username);
+	collaboration.addUser(newUser);
+}
+
+void Session::assignTaskInCollaboration(const MyString& collabName, const MyString& username, const MyString& name, const std::tm& dueDate, const MyString& description)
+{
+	Collaboration& collaboration = getCollaborationByName(collabName);
+	User& assignee = getUserByUsername(username);
+
+	Task* taskForUser = new CollaborativeTask(name, dueDate, description, username);
+
+	collaboration.addTask(*taskForUser);
+	collaboration.addUser(assignee);
+	assignee.addTask(taskForUser);	
+}
+
+void Session::listCollabTasks(const MyString& name)
+{
+	Collaboration& collaboration = getCollaborationByName(name);
+	collaboration.listTasks();
+}
+
+User* Session::getCurrentUser() const
+{
+	return currentUser;
 }
 
 void Session::loadUsers(const char* fileName)
@@ -132,7 +165,8 @@ void Session::loadUsers(const char* fileName)
 
 		MyString newUsername = MyString(username);
 		MyString newPassword = MyString(password);
-		User user(newUsername, newPassword);
+
+		User* user = new User(newUsername, newPassword);
 		delete[] username;
 		delete[] password;
 
@@ -183,13 +217,14 @@ void Session::loadUsers(const char* fileName)
 			task->setId(taskId);
 			task->setStatus(taskStatus);
 			task->setDescription(description);
-			user.addTask(task);
+			user->addTask(task);
+			allTasks.addTask(task);
 
 			// Checks if the task's due_date is today and adds it to the dashboard
 			if (hasDueDate) {
 				std::tm taskDate = task->getDate().getValue();
 				if (areDatesEqual(taskDate, today)) {
-					user.addTaskToDashboard(task->getId());
+					user->addTaskToDashboard(task->getId());
 				}
 			}
 
@@ -206,7 +241,7 @@ void Session::loadUsers(const char* fileName)
 		for (size_t i = 0; i < dashboardTaskCount; i++) {
 			unsigned dashboardTaskId;
 			file.read((char*)(&dashboardTaskId), sizeof(dashboardTaskId));
-			user.addTaskToDashboard(dashboardTaskId);
+			user->addTaskToDashboard(dashboardTaskId);
 		}
 
 		allUsers.pushBack(user);
@@ -221,22 +256,22 @@ void Session::saveUsers(const char* fileName) const
 
 	for (int i = 0; i < allUsers.getSize(); i++) {
 		// Write username
-		const MyString& username = allUsers[i].getUsername();
+		const MyString& username = allUsers[i]->getUsername();
 		size_t usernameSize = username.getSize();
 		file.write((const char*)&usernameSize, sizeof(usernameSize));
 		file.write(username.c_str(), usernameSize);
 
 		// Write password
-		const MyString& password = allUsers[i].getPassword();
+		const MyString& password = allUsers[i]->getPassword();
 		size_t passwordSize = password.getSize();
 		file.write((const char*)&passwordSize, sizeof(passwordSize));
 		file.write(password.c_str(), passwordSize);
 
 		// Write number of tasks
-		size_t taskCount = allUsers[i].getTasks().getSize();
+		size_t taskCount = allUsers[i]->getTasks().getSize();
 		file.write((const char*)(&taskCount), sizeof(taskCount));
 
-		TasksCollection currUserTasks = allUsers[i].getTasks();
+		TasksCollection currUserTasks = allUsers[i]->getTasks();
 		for (size_t j = 0; j < taskCount; j++)
 		{
 			Task* task = currUserTasks[j];
@@ -278,7 +313,7 @@ void Session::saveUsers(const char* fileName) const
 		}
 
 		// Write number of dashboard tasks
-		TasksCollection currUserDashboardTasks = allUsers[i].getDashboard().getTasks();
+		TasksCollection currUserDashboardTasks = allUsers[i]->getDashboard().getTasks();
 		size_t dashboardTaskCount = currUserDashboardTasks.getSize();
 		file.write((const char*)(&dashboardTaskCount), sizeof(dashboardTaskCount));
 
@@ -292,78 +327,173 @@ void Session::saveUsers(const char* fileName) const
 	}
 }
 
-void Session::saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount)
+//void Session::saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount)
+//{
+//	for (size_t j = 0; j < taskCount; j++)
+//	{
+//		Task* task = currUserTasks[j];
+//		task->printTask();
+//
+//		// Write task ID
+//		unsigned taskId = task->getId();
+//		file.write((const char*)(&taskId), sizeof(taskId));
+//
+//		// Write task name
+//		const MyString& name = task->getName();
+//		size_t nameLength = name.getSize();
+//		file.write((const char*)(&nameLength), sizeof(nameLength));
+//		file.write(name.c_str(), nameLength);
+//
+//		// Write due date - handling if the task has/not a due_date
+//		bool hasDueDate = 0;
+//		if (task->getDate().isFilled())
+//		{
+//			std::tm due_date = task->getDate().getValue();
+//			hasDueDate = 1;
+//			file.write((const char*)&hasDueDate, sizeof(hasDueDate));
+//			file.write((const char*)&due_date, sizeof(due_date));
+//		}
+//		/*else
+//		{
+//			due_date = MyString("");
+//			hasDueDate = 0;
+//			file.write((const char*)(&hasDueDate), sizeof(hasDueDate));
+//		}*/
+//
+//		// Write task status
+//		Status taskStatus = task->getStatus();
+//		file.write((const char*)(&taskStatus), sizeof(taskStatus));
+//
+//		// Write task description
+//		const MyString& description = task->getDescription();
+//		size_t descriptionLength = description.getSize();
+//		file.write((const char*)(&descriptionLength), sizeof(descriptionLength));
+//		file.write(description.c_str(), descriptionLength);
+//	}
+//}
+
+void Session::loadCollaborations(const MyString& fileName)
 {
-	for (size_t j = 0; j < taskCount; j++)
-	{
-		Task* task = currUserTasks[j];
-		task->printTask();
+	std::ifstream file(fileName.c_str(), std::ios::binary | std::ios::in);
+	if (!file.is_open())
+		throw std::runtime_error("Failed to open file for reading!");
 
-		// Write task ID
-		unsigned taskId = task->getId();
-		file.write((const char*)(&taskId), sizeof(taskId));
+	while (true) {
+		Collaboration collab;
 
-		// Write task name
-		const MyString& name = task->getName();
-		size_t nameLength = name.getSize();
-		file.write((const char*)(&nameLength), sizeof(nameLength));
-		file.write(name.c_str(), nameLength);
+		// Read ID
+		unsigned collabId = 0;
+		file.read((char*)(&collabId), sizeof(collabId));
 
-		// Write due date - handling if the task has/not a due_date
-		bool hasDueDate = 0;
-		if (task->getDate().isFilled())
-		{
-			std::tm due_date = task->getDate().getValue();
-			hasDueDate = 1;
-			file.write((const char*)&hasDueDate, sizeof(hasDueDate));
-			file.write((const char*)&due_date, sizeof(due_date));
+		if (file.eof()) break;
+
+		// Read name
+		size_t nameLength = 0;
+		file.read((char*)(&nameLength), sizeof(nameLength));
+
+		char* collabName = new char[nameLength + 1];
+		file.read(collabName, nameLength);
+		collabName[nameLength] = '\0';
+
+		// Read creator username
+		size_t creatorNameLength = 0;
+		file.read((char*)(&creatorNameLength), sizeof(creatorNameLength));
+
+		char* creatorUsername = new char[creatorNameLength + 1];
+		file.read(creatorUsername, creatorNameLength);
+		creatorUsername[creatorNameLength] = '\0';
+		User& creator = getUserByUsername(creatorUsername);
+
+		// Read Users
+		size_t usernamesCount;
+		file.read((char*)(&usernamesCount), sizeof(usernamesCount));
+		for (size_t i = 0; i < usernamesCount; i++) {
+			size_t userNameLength = 0;
+			file.read((char*)(&userNameLength), sizeof(userNameLength));
+
+			char* username = new char[userNameLength + 1];
+			file.read(username, userNameLength);
+			username[userNameLength] = '\0';
+
+			User& user = getUserByUsername(username);
+			collab.addUser(user);
+
+			delete[] username;
 		}
-		/*else
-		{
-			due_date = MyString("");
-			hasDueDate = 0;
-			file.write((const char*)(&hasDueDate), sizeof(hasDueDate));
-		}*/
 
-		// Write task status
-		Status taskStatus = task->getStatus();
-		file.write((const char*)(&taskStatus), sizeof(taskStatus));
+		// Read Collab Task-ids
+		size_t taskIdsCount;
+		file.read((char*)(&taskIdsCount), sizeof(taskIdsCount));
+		for (size_t i = 0; i < taskIdsCount; i++) {
+			unsigned taskId = 0;
+			file.read((char*)(&taskId), sizeof(taskId));
 
-		// Write task description
-		const MyString& description = task->getDescription();
-		size_t descriptionLength = description.getSize();
-		file.write((const char*)(&descriptionLength), sizeof(descriptionLength));
-		file.write(description.c_str(), descriptionLength);
+			Task* task = getTaskById(taskId);
+
+			if (task) {
+				collab.addTask(*task);
+				delete task;
+			}
+		}
+
+		collab.setId(collabId);
+		collab.setName(MyString(collabName));
+		collab.setCreator(creator);
+
+		delete[] collabName;
+		delete[] creatorUsername;
+
+		// Assuming allCollaborations is a global or member variable.
+		allCollaborations.pushBack(&collab);
 	}
 }
 
-//
-//void Session::loadCollaborations(const MyString& fileName)
-//{
-//	std::ifstream file(fileName.c_str(), std::ios::binary | std::ios::in);
-//	if (!file.is_open())
-//		throw std::runtime_error("Failed to open file for reading!");
-//
-//	while (!file.eof())
-//	{
-//		/*Collaboration collaboration;
-//		file.read((char*)(&collaboration), sizeof(Task));
-//		allCollaborations.pushBack(collaboration);*/
-//	}
-//}
-//
-//void Session::saveCollaborations(const MyString& fileName) const
-//{
-//	std::ofstream file(fileName.c_str(), std::ios::binary | std::ios::out);
-//	if (!file.is_open())
-//		throw std::runtime_error("Failed to open file for writing!");
-//
-//	/*for (size_t i = 0; i < allCollaborations.getSize(); i++)
-//	{
-//		Collaboration collab;
-//		file.write((const char*)(&collab), sizeof(Collaboration));
-//	}*/
-//}
+void Session::saveCollaborations(const MyString& fileName) const
+{
+	std::ofstream file(fileName.c_str(), std::ios::binary | std::ios::out);
+	if (!file.is_open())
+		throw std::runtime_error("Failed to open file for writing!");
+
+	for (int i = 0; i < allCollaborations.getSize(); i++) {
+		// Write collab Id
+		unsigned collabId = allCollaborations[i]->getId();
+		file.write((const char*)&collabId, sizeof(collabId));
+
+		// Write collab name
+		const MyString& collabName = allCollaborations[i]->getName();
+		size_t nameLength = collabName.getSize();
+		file.write((const char*)(&nameLength), sizeof(nameLength));
+		file.write(collabName.c_str(), nameLength);
+
+		// Write creator username
+		const MyString& creatorName = allCollaborations[i]->getCreator().getUsername();
+		size_t creatorNameLength = creatorName.getSize();
+		file.write((const char*)(&creatorNameLength), sizeof(creatorNameLength));
+		file.write(creatorName.c_str(), creatorNameLength);
+
+		// Write collab users
+		Vector<User> collabUsers = allCollaborations[i]->getUsers();
+		size_t usernamesCount = collabUsers.getSize();
+		file.write((const char*)&usernamesCount, sizeof(usernamesCount));
+
+		for (int j = 0; j < usernamesCount; j++) {
+			const MyString& username = collabUsers[j].getUsername();
+			size_t usernameLength = username.getSize();
+			file.write((const char*)(&usernameLength), sizeof(usernameLength));
+			file.write(username.c_str(), usernameLength);
+		}
+
+		// Write collab Tasks
+		TasksCollection collabTasks = allCollaborations[i]->getTasks();
+		size_t taskIdsCount = collabTasks.getSize();
+		file.write((const char*)&taskIdsCount, sizeof(taskIdsCount));
+
+		for (int j = 0; j < taskIdsCount; j++) {
+			unsigned taskId = collabTasks[j]->getId();
+			file.write((const char*)&taskId, sizeof(taskId));
+		}
+	}
+}
 
 // TODO IS THERE A BETTER WAY TO GET THE CURRENT LOCAL TIME???
 std::tm Session::getCurrentDate()
@@ -398,9 +528,34 @@ bool Session::areDatesEqual(const std::tm& date1, const std::tm& date2) {
 
 int Session::findUserIndexByUsername(const MyString& username) {
 	for (size_t i = 0; i < allUsers.getSize(); i++) {
-		if (allUsers[i].getUsername() == username) {
+		if (allUsers[i]->getUsername() == username) {
 			return i;
 		}
 	}
 	return -1; // User not found
+}
+
+User& Session::getUserByUsername(const MyString& name) const
+{
+	for (int i = 0; i < allUsers.getSize(); i++)
+	{
+		if (allUsers[i]->getUsername() == name)
+			return (*allUsers[i]);
+	}
+	throw std::logic_error("No user with the given username!");
+}
+
+Task* Session::getTaskById(unsigned id)
+{
+	return allTasks.getTaskById(id);
+}
+
+Collaboration& Session::getCollaborationByName(const MyString& name)
+{
+	for (int i = 0; i < allCollaborations.getSize(); i++)
+	{
+		if (allCollaborations[i]->getName() == name)
+			return (*allCollaborations[i]);
+	}
+	throw std::logic_error("No collaboration with the given name was found!");
 }

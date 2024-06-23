@@ -222,6 +222,60 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 		ss >> id;
 		handleFinishTask(id);
 	}
+	else if (strcmp(buff, "add-collaboration") == 0)
+	{
+		char name[GlobalConstants::BUFF_SIZE];
+		ss >> name;
+		handleAddCollaboration(name);
+	}
+	else if (strcmp(buff, "delete-collaboration") == 0)
+	{
+		char name[GlobalConstants::BUFF_SIZE];
+		ss >> name;
+		handleDeleteCollaboration(name);
+	}
+	else if (strcmp(buff, "list-collaborations") == 0)
+	{
+		handleListCollaborations();
+	}
+	else if (strcmp(buff, "add-user") == 0)
+	{
+		char collabName[GlobalConstants::BUFF_SIZE];
+		char username[GlobalConstants::BUFF_SIZE];
+
+		ss >> collabName >> username;
+		handleAddUserToCollaboration(collabName, username);
+	}
+	else if (strcmp(buff, "assign-task") == 0)
+	{
+		char collabName[GlobalConstants::BUFF_SIZE];
+		char username[GlobalConstants::BUFF_SIZE];
+		char name[GlobalConstants::BUFF_SIZE];
+		char due_date_str[GlobalConstants::BUFF_SIZE];
+		char description[GlobalConstants::BUFF_SIZE];
+
+		ss >> collabName >> username >> name;
+
+		ss >> due_date_str;
+		std::tm due_date = {};
+		try {
+			due_date = parseDate(due_date_str);
+		}
+		catch (const std::exception& e) {
+			std::cerr << "Error: " << e.what() << std::endl;
+			return;
+		}
+		ss.getline(description, sizeof(description));
+
+		handleAssignTask(collabName, username, name, due_date, description);
+	}
+	else if (strcmp(buff, "list-collab-tasks") == 0)
+	{
+		char collabName[GlobalConstants::BUFF_SIZE];
+
+		ss >> collabName;
+		handleListCollaborationTasks(collabName);
+	}
 	else if (strcmp(buff, "exit") == 0)
 	{
 		isRunning = false;
@@ -544,30 +598,37 @@ void Engine::handleFinishTask(unsigned id)
 	}
 }
 
-/*Handle Collabs functions*/
-//void Engine::handleAddCollaboration(const MyString& name)
-//{
-//}
-//
-//void Engine::handleDeleteCollaboration(const MyString& name)
-//{
-//}
-//
-//void Engine::handleListCollaborations()
-//{
-//}
-//
-//void Engine::handleAddUserToCollaboration(const MyString& collabName, const MyString& username)
-//{
-//}
-//
-//void Engine::handleAssignTask(const MyString& collabName, const MyString& username, const MyString& taskName, const MyString& dueDate, const MyString& description)
-//{
-//}
-//
-//void Engine::handleListCollaborationTasks(const MyString& collabName)
-//{
-//}
+void Engine::handleAddCollaboration(const MyString& name)
+{
+	session.addCollaboration(name);
+}
+
+void Engine::handleDeleteCollaboration(const MyString& name)
+{
+	session.deleteCollaboration(name);
+}
+
+void Engine::handleListCollaborations()
+{
+	session.listCollaborations();
+}
+
+void Engine::handleAddUserToCollaboration(const MyString& collabName, const MyString& username)
+{
+	session.addUserToCollaboration(collabName, username);
+}
+
+void Engine::handleAssignTask(const MyString& collabName, const MyString& username, 
+	const MyString& taskName, const std::tm& dueDate, const MyString& description)
+{
+	session.assignTaskInCollaboration(collabName, username, taskName, dueDate, description);
+}
+
+void Engine::handleListCollaborationTasks(const MyString& collabName)
+{
+	session.listCollabTasks(collabName);
+}
+
 bool Engine::isDateFilled(const std::tm& date)
 {
 	return (date.tm_year != 0 || date.tm_mon != 0 || date.tm_mday != 0);

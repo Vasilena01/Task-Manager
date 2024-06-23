@@ -155,7 +155,7 @@ void User::addTaskToDashboard(unsigned id)
 	Task* task = getTaskByID(id);
 
 	if (task->getStatus() != Status::OVERDUE)
-		dashboard.addTask(task->clone());
+		dashboard.addTask(task);
 }
 
 void User::removeTaskFromDashboard(unsigned id)

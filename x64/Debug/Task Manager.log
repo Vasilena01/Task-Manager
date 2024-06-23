@@ -1,12 +1,6 @@
 ﻿  Session.cpp
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(242,31): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(287,55): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(299,30): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(402,11): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-  User.cpp
-D:\Projects\C++\Task Manager - OOP project\Task Manager\User.cpp(100,13): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\Projects\C++\Task Manager - OOP project\Task Manager\User.cpp(100,36): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\Projects\C++\Task Manager - OOP project\Task Manager\User.cpp(100,78): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  Generating Code...
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(277,31): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(322,55): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(532,11): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
   Task Manager.vcxproj -> D:\Projects\C++\Task Manager - OOP project\Task Manager\x64\Debug\Task Manager.exe

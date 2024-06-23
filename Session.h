@@ -1,12 +1,8 @@
 #pragma once
-#include "Vector.hpp"
-#include "MyString.h"
-#include "UniquePtr.hpp"
+#include "SharedPtr.hpp"
 #include "GlobalConstants.h"
-#include "DatePool.h"
-#include "User.h"
 #include "Collaboration.h"
-#include "TasksCollection.h"
+#include "CollaborativeTask.h"
 
 class Session
 {
@@ -14,27 +10,41 @@ public:
 	Session();
 	~Session();
 
+	// User functionalities
 	void registerUser(const MyString& username, const MyString& password);
 	bool login(const MyString& username, const MyString& password);
 	void logout();
 	void exit();
 
+	// Collaboration functionalities
+	void addCollaboration(const MyString& name);
+	void deleteCollaboration(const MyString& name);
+	void listCollaborations() const;
+	void addUserToCollaboration(const MyString& collabName, const MyString& username);
+	void assignTaskInCollaboration(const MyString& collabName, const MyString& username, 
+		const MyString& name, const std::tm& dueDate, const MyString& description);
+	void listCollabTasks(const MyString& name);
+
 	User* getCurrentUser() const;
-	Vector<User> getAllUsers() const;
 private:
-	UniquePtr<User> currentUser;
-	Vector<User> allUsers;
-	//Vector<Collaboration> allCollaborations;
+	User* currentUser;
+	Vector<User*> allUsers;
+	Vector<Collaboration*> allCollaborations;
+	TasksCollection allTasks;
 
 	void loadUsers(const char* fileName);
 	void saveUsers(const char* fileName) const;
-	void saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount);
+	//void saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount);
 	//void loadTasks(const MyString& fileName) const;
-	/*void loadCollaborations(const MyString& fileName);
-	void saveCollaborations(const MyString& fileName) const;*/
+	void loadCollaborations(const MyString& fileName);
+	void saveCollaborations(const MyString& fileName) const;
 
 	std::tm getCurrentDate();
 	bool areDatesEqual(const std::tm& date1, const std::tm& date2);
 	int findUserIndexByUsername(const MyString& username);
+	User& getUserByUsername(const MyString& name) const;
+	Task* getTaskById(unsigned id);
+
+	Collaboration& getCollaborationByName(const MyString& name);
 };
 

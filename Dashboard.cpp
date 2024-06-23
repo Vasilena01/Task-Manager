@@ -19,7 +19,7 @@ void Dashboard::addTask(Task* task)
             && tasks[i]->getDescription() == task->getDescription())
             throw std::logic_error("This task is already added to the dashboard!");
     }
-    tasks.addTask(task->clone());
+    tasks.addTask(task);
 }
 
 void Dashboard::removeTask(unsigned id)

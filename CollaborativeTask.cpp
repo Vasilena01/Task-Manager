@@ -18,5 +18,6 @@ void CollaborativeTask::setAssignee(const MyString& assignee)
 
 Task* CollaborativeTask::clone() const
 {
-	return new Task(*this);
+	Task* newObj = new CollaborativeTask(*this);
+	return newObj;
 }

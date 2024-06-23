@@ -30,12 +30,12 @@ private:
     void handleListCompletedTasks();
     void handleListDashboard();
     void handleFinishTask(unsigned id);
-    /*void handleAddCollaboration(const MyString& name);
+    void handleAddCollaboration(const MyString& name);
     void handleDeleteCollaboration(const MyString& name);
     void handleListCollaborations();
     void handleAddUserToCollaboration(const MyString& collabName, const MyString& username);
-    void handleAssignTask(const MyString& collabName, const MyString& username, const MyString& taskName, const MyString& dueDate, const MyString& description);
-    void handleListCollaborationTasks(const MyString& collabName);*/
+    void handleAssignTask(const MyString& collabName, const MyString& username, const MyString& taskName, const std::tm& dueDate, const MyString& description);
+    void handleListCollaborationTasks(const MyString& collabName);
 
     bool isDateFilled(const std::tm& date);
     bool isValidDate(const char* dateStr);
