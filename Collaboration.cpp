@@ -57,19 +57,36 @@ bool Collaboration::isUserInCollaboration(const MyString& username) const
     return creator->getUsername() == username;
 }
 
+bool Collaboration::isTaskInCollaboration(unsigned id)
+{
+    for (int i = 0; i < tasks.getSize(); i++)
+    {
+        if (tasks[i]->getId() == id)
+            return true;
+    }
+    return false;
+}
+
 void Collaboration::addUser(User* user)
 {
-    users.pushBack(user);
+    if(!isUserInCollaboration(user->getUsername()))
+        users.pushBack(user);
 }
 
 void Collaboration::addTask(const Task& task)
 {
-    tasks.addTask(task);
+    if (!isTaskInCollaboration(task.getId()))
+        tasks.addTask(task);
+    else
+        throw std::logic_error("This task already exists in this collaboration.");
 }
 
 void Collaboration::addTask(Task* task)
 {
-    tasks.addTask(task);
+    if (!isTaskInCollaboration(task->getId()))
+        tasks.addTask(task);
+    else
+        throw std::logic_error("This task already exists in this collaboration.");
 }
 
 void Collaboration::deleteTasksInCollaboration()

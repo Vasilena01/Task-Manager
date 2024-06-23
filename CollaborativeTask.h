@@ -13,7 +13,8 @@ public:
     Optional<MyString> getAssignee() const;
     void setAssignee(const MyString& assignee);
 
-    virtual Task* clone() const override;
+    Task* clone() const override;
+    void printTask() const override;
 private:
     Optional<MyString> assignee;
 };

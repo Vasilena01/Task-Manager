@@ -9,6 +9,7 @@ Session::Session()
 
 Session::~Session()
 {
+	delete currentUser;
 	exit();
 }
 
@@ -72,7 +73,6 @@ void Session::exit()
 		std::cout << e.what();
 	}
 
-	//saveCollaborations("collaborations.dat");
 	std::cout << "Session ended. All data saved." << std::endl;
 }
 
@@ -125,7 +125,7 @@ void Session::assignTaskInCollaboration(const MyString& collabName, const MyStri
 
 	collaboration->addTask(taskForUser);
 	collaboration->addUser(assignee);
-	assignee->addTask(taskForUser);	
+	assignee->addTask(taskForUser);
 }
 
 void Session::listCollabTasks(const MyString& name)
@@ -234,7 +234,6 @@ void Session::loadUsers(const char* fileName)
 
 			delete[] taskName;
 			delete[] description;
-			delete task;
 		}
 
 		// Read number of dashboard tasks
@@ -331,51 +330,6 @@ void Session::saveUsers(const char* fileName) const
 	}
 }
 
-//void Session::saveTasks(std::ofstream& file, TasksCollection& currUserTasks, size_t taskCount)
-//{
-//	for (size_t j = 0; j < taskCount; j++)
-//	{
-//		Task* task = currUserTasks[j];
-//		task->printTask();
-//
-//		// Write task ID
-//		unsigned taskId = task->getId();
-//		file.write((const char*)(&taskId), sizeof(taskId));
-//
-//		// Write task name
-//		const MyString& name = task->getName();
-//		size_t nameLength = name.getSize();
-//		file.write((const char*)(&nameLength), sizeof(nameLength));
-//		file.write(name.c_str(), nameLength);
-//
-//		// Write due date - handling if the task has/not a due_date
-//		bool hasDueDate = 0;
-//		if (task->getDate().isFilled())
-//		{
-//			std::tm due_date = task->getDate().getValue();
-//			hasDueDate = 1;
-//			file.write((const char*)&hasDueDate, sizeof(hasDueDate));
-//			file.write((const char*)&due_date, sizeof(due_date));
-//		}
-//		/*else
-//		{
-//			due_date = MyString("");
-//			hasDueDate = 0;
-//			file.write((const char*)(&hasDueDate), sizeof(hasDueDate));
-//		}*/
-//
-//		// Write task status
-//		Status taskStatus = task->getStatus();
-//		file.write((const char*)(&taskStatus), sizeof(taskStatus));
-//
-//		// Write task description
-//		const MyString& description = task->getDescription();
-//		size_t descriptionLength = description.getSize();
-//		file.write((const char*)(&descriptionLength), sizeof(descriptionLength));
-//		file.write(description.c_str(), descriptionLength);
-//	}
-//}
-
 void Session::loadCollaborations(const MyString& fileName)
 {
 	std::ifstream file(fileName.c_str(), std::ios::binary | std::ios::in);
@@ -437,7 +391,6 @@ void Session::loadCollaborations(const MyString& fileName)
 
 			if (task) {
 				collab->addTask(task);
-				delete task;
 			}
 		}
 
@@ -496,7 +449,6 @@ void Session::saveCollaborations(const MyString& fileName) const
 	}
 }
 
-// TODO IS THERE A BETTER WAY TO GET THE CURRENT LOCAL TIME???
 std::tm Session::getCurrentDate()
 {
 	std::time_t t = std::time(nullptr);
@@ -539,8 +491,8 @@ User* Session::getUserByUsername(const MyString& name)
 		}
 	}
 
-	if(!isFound)
-		throw std::logic_error("No user with the given username!");
+	if (!isFound)
+		throw std::logic_error("No user with the given username found!");
 }
 
 Task* Session::getTaskById(unsigned id)
@@ -557,7 +509,7 @@ Collaboration* Session::getCollaborationByName(const MyString& name)
 			return allCollaborations[i];
 	}
 
-	if(!isFound)
+	if (!isFound)
 		throw std::logic_error("No collaboration with the given name was found!");
 }
 

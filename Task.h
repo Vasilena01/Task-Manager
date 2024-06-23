@@ -23,10 +23,10 @@ public:
 	void setDescription(const MyString& newDescription);
 	void setStatus(const Status& newStatus);
 
-	void printTask() const;
+	virtual void printTask() const;
 	virtual Task* clone() const;
 	virtual ~Task() = default;
-private:
+protected:
 	unsigned id;
 	MyString taskName;
 	Optional<std::tm> due_date;

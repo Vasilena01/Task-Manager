@@ -21,6 +21,7 @@ public:
     void setCreator(User* newCreator);
 
     bool isUserInCollaboration(const MyString& username) const;
+    bool isTaskInCollaboration(unsigned id);
     void addUser(User* user);
     void addTask(const Task& task);    
     void addTask(Task* task);

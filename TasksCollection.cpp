@@ -103,7 +103,9 @@ Task* TasksCollection::operator[] (unsigned index)
 void TasksCollection::free()
 {
 	for (size_t i = 0; i < tasksCount; i++)
+	{
 		delete tasks[i];
+	}
 	delete[] tasks;
 }
 

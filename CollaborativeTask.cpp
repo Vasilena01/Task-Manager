@@ -21,3 +21,18 @@ Task* CollaborativeTask::clone() const
 	Task* newObj = new CollaborativeTask(*this);
 	return newObj;
 }
+
+void CollaborativeTask::printTask() const
+{
+	std::cout << "ID: " << id << std::endl;
+	std::cout << "NAME: " << taskName << std::endl;
+	std::cout << "ASSIGNEE: " << assignee.getValue() << std::endl;
+
+	if (due_date.isFilled())
+	{
+		printDate();
+	}
+	printStatus(status);
+
+	std::cout << "DESCRIPTION: " << description << std::endl;
+}

@@ -254,7 +254,9 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 		char due_date_str[GlobalConstants::BUFF_SIZE];
 		char description[GlobalConstants::BUFF_SIZE];
 
-		ss >> collabName >> username >> name;
+		ss >> collabName;
+		ss >> username;
+		ss >> name;
 
 		ss >> due_date_str;
 		std::tm due_date = {};
@@ -601,11 +603,13 @@ void Engine::handleFinishTask(unsigned id)
 void Engine::handleAddCollaboration(const MyString& name)
 {
 	session.addCollaboration(name);
+	std::cout << "Collaboration added successfully!" << std::endl;
 }
 
 void Engine::handleDeleteCollaboration(const MyString& name)
 {
 	session.deleteCollaboration(name);
+	std::cout << "Collaboration deleted successfully!" << std::endl;
 }
 
 void Engine::handleListCollaborations()
@@ -616,12 +620,14 @@ void Engine::handleListCollaborations()
 void Engine::handleAddUserToCollaboration(const MyString& collabName, const MyString& username)
 {
 	session.addUserToCollaboration(collabName, username);
+	std::cout << "User added successfully!" << std::endl;
 }
 
 void Engine::handleAssignTask(const MyString& collabName, const MyString& username, 
 	const MyString& taskName, const std::tm& dueDate, const MyString& description)
 {
 	session.assignTaskInCollaboration(collabName, username, taskName, dueDate, description);
+	std::cout << "Task assigned successfully!" << std::endl;
 }
 
 void Engine::handleListCollaborationTasks(const MyString& collabName)
