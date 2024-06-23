@@ -46,12 +46,6 @@ TasksCollection::~TasksCollection()
 	free();
 }
 
-void TasksCollection::readTasksFromFile(const char* filename)
-{
-
-}
-
-
 void TasksCollection::addTask(Task* task)
 {
 	if (tasksCount == capacity)

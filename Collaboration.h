@@ -27,6 +27,7 @@ public:
     void addTask(Task* task);
     void deleteTasksInCollaboration();
     void deleteTaskFromAllUsers(unsigned taskId);
+    void deleteTaskFromCollaboration(unsigned taskId);
     void listTasks() const;
 private:
     unsigned collabId;

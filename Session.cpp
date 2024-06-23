@@ -9,7 +9,6 @@ Session::Session()
 
 Session::~Session()
 {
-	delete currentUser;
 	exit();
 }
 
@@ -21,12 +20,11 @@ void Session::registerUser(const MyString& username, const MyString& password)
 		{
 			std::cerr << "User already exists." << std::endl;
 			return;
-			//throw std::logic_error("User already exists.");
 		}
 	}
 
-	User newUser(username, password);
-	allUsers.pushBack(&newUser);
+	User* newUser = new User(username, password);
+	allUsers.pushBack(newUser);
 
 	std::cout << "Registered successfully!" << std::endl;
 }
@@ -278,7 +276,6 @@ void Session::saveUsers(const char* fileName) const
 		for (size_t j = 0; j < taskCount; j++)
 		{
 			Task* task = currUserTasks[j];
-			task->printTask();
 
 			// Write task ID
 			unsigned taskId = task->getId();
@@ -496,6 +493,7 @@ User* Session::getUserByUsername(const MyString& name)
 }
 
 Task* Session::getTaskById(unsigned id)
+
 {
 	return allTasks.getTaskById(id);
 }
@@ -521,4 +519,16 @@ int Session::getCollabIndexById(unsigned id)
 			return i;
 	}
 	return -1;
+}
+
+void Session::deleteTaskFromAllCollaborations(unsigned id)
+{
+	for (int i = 0; i < allCollaborations.getSize(); i++)
+	{
+		if (allCollaborations[i]->isTaskInCollaboration(id))
+		{
+			allCollaborations[i]->deleteTaskFromCollaboration(id);
+			return;
+		}
+	}
 }

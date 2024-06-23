@@ -110,6 +110,11 @@ void Collaboration::deleteTaskFromAllUsers(unsigned taskId)
     }
 }
 
+void Collaboration::deleteTaskFromCollaboration(unsigned taskId)
+{
+    tasks.removeTask(taskId);
+}
+
 void Collaboration::listTasks() const
 {
     for (int i = 0; i < tasks.getSize(); i++)

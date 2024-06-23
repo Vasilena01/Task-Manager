@@ -24,6 +24,7 @@ public:
 	void assignTaskInCollaboration(const MyString& collabName, const MyString& username, 
 		const MyString& name, const std::tm& dueDate, const MyString& description);
 	void listCollabTasks(const MyString& name);
+	void deleteTaskFromAllCollaborations(unsigned id);
 
 	User* getCurrentUser() const;
 private:

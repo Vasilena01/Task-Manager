@@ -14,8 +14,6 @@ public:
 
 	~TasksCollection();
 
-	void readTasksFromFile(const char* filename);
-
 	void addTask(Task* task);
 	void addTask(const Task& task);
 

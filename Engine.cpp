@@ -5,7 +5,7 @@
 void Engine::start()
 {
 	char command[GlobalConstants::BUFF_SIZE];
-	std::cout << "Wellcome to your task manager!" << std::endl;
+	std::cout << "Welcome to your task manager!" << std::endl;
 	std::cout << "Choose: register / login / exit" << std::endl;
 
 	bool isRunning = true;
@@ -472,6 +472,7 @@ void Engine::handleDeleteTask(unsigned id)
 	if (currentUser)
 	{
 		currentUser->deleteTask(id);
+		session.deleteTaskFromAllCollaborations(id);
 		std::cout << "Task deleted successfully!" << std::endl;
 	}
 	else
@@ -479,61 +480,6 @@ void Engine::handleDeleteTask(unsigned id)
 		std::cerr << "No user logged in." << std::endl;
 	}
 }
-
-/*TODO uncomment*/
-//void Engine::handleGetTask(const MyString& identifier)
-//{
-//	//try {
-//	//	UniquePtr<User> currentUser = session.getCurrentUser();
-//	//	if (currentUser)
-//	//	{
-//	//		// Checking if the identifier is a name or id
-//	//		bool isNumber = true;
-//	//		for (size_t i = 0; i < identifier.getSize(); i++)
-//	//		{
-//	//			if (identifier[i] < '0' || identifier[i] > '9')
-//	//			{
-//	//				isNumber = false;
-//	//				break;
-//	//			}
-//	//		}
-//
-//	//		if (isNumber)
-//	//		{
-//	//			unsigned taskId = 0;
-//	//			for (size_t i = 0; i < identifier.getSize(); i++)
-//	//			{
-//	//				taskId = taskId * 10 + (identifier[i] - '0');
-//	//			}
-//
-//	//			currentUser->getTaskByID(taskId);
-//	//			return;
-//	//		}
-//	//		else
-//	//		{
-//	//			currentUser->getTaskByName(identifier);
-//	//			return;
-//	//		}
-//	//	}
-//	//	else
-//	//	{
-//	//		std::cerr << "No user logged in." << std::endl;
-//	//	}
-//	//}
-//	//catch (const std::logic_error& e)
-//	//{
-//	//	std::cerr << "Logic error while adding task: " << e.what() << std::endl;
-//	//}
-//	//catch (const std::runtime_error& e)
-//	//{
-//	//	std::cerr << "Runtime error while adding task: " << e.what() << std::endl;
-//	//}
-//	//catch (const std::exception& e)
-//	//{
-//	//	std::cerr << "An error occurred while adding task: " << e.what() << std::endl;
-//	//}
-//	
-//}
 
 void Engine::handleListTasks(const std::tm& due_date)
 {

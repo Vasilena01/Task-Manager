@@ -24,7 +24,6 @@ private:
     void handleRemoveTaskFromDashboard(unsigned id);
     void handleAddTaskToDashboard(unsigned id);
     void handleDeleteTask(unsigned id);
-    //void handleGetTask(const MyString& identifier);
     void handleListTasks(const std::tm& due_date);
     void handleListTasks();
     void handleListCompletedTasks();
