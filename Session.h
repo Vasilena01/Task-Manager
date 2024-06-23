@@ -1,5 +1,4 @@
 #pragma once
-#include "SharedPtr.hpp"
 #include "GlobalConstants.h"
 #include "Collaboration.h"
 #include "CollaborativeTask.h"
@@ -40,9 +39,10 @@ private:
 
 	std::tm getCurrentDate();
 	bool areDatesEqual(const std::tm& date1, const std::tm& date2);
+
+	// Getters
 	User* getUserByUsername(const MyString& name);
 	Task* getTaskById(unsigned id);
-
 	Collaboration* getCollaborationByName(const MyString& name);
 	int getCollabIndexById(unsigned id);
 };

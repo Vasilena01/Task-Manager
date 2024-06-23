@@ -6,7 +6,6 @@
 class Engine
 {
 public:
-	//Engine();
 	void start();
 private:
     Session session;

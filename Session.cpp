@@ -77,8 +77,17 @@ void Session::exit()
 // Collaborations methods
 void Session::addCollaboration(const MyString& name)
 {
-	Collaboration* newCollaboration = new Collaboration(name, currentUser);
-	allCollaborations.pushBack(newCollaboration);
+	try
+	{
+		if (getCollaborationByName(name)->getId())
+			std::cout << "A collaboration with this name already exists!" << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		Collaboration* newCollaboration = new Collaboration(name, currentUser);
+		allCollaborations.pushBack(newCollaboration);
+		std::cout << "Collaboration added successfully!" << std::endl;
+	}
 }
 
 void Session::deleteCollaboration(const MyString& name)
@@ -394,7 +403,6 @@ void Session::loadCollaborations(const MyString& fileName)
 		delete[] collabName;
 		delete[] creatorUsername;
 
-		// Assuming allCollaborations is a global or member variable.
 		allCollaborations.pushBack(collab);
 	}
 }

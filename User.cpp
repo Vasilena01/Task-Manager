@@ -137,17 +137,6 @@ void User::deleteTask(unsigned id)
 		dashboard.removeTask(id);
 
 	tasks.removeTask(id);
-	//for (int i = 0; i < tasks.getSize(); i++)
-	//{
-	//    if (tasks[i] != nullptr && tasks[i]->getId() == id)
-	//    {
-	//        delete tasks[i];
-	//        // TODO da se opravi, uj tasks[i] bilo const...
-	//        //tasks[i] = nullptr;
-	//        return;            
-	//    }
-	//}
-	//throw std::logic_error("There is no task with the given ID!");
 }
 
 void User::addTaskToDashboard(unsigned id)

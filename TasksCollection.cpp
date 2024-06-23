@@ -6,8 +6,6 @@ TasksCollection::TasksCollection()
 	capacity = 8;
 	tasksCount = 0;
 	tasks = new Task * [capacity];
-
-	//fill the collection
 }
 
 TasksCollection::TasksCollection(const TasksCollection& other)
@@ -51,7 +49,6 @@ void TasksCollection::addTask(Task* task)
 	if (tasksCount == capacity)
 		resize();
 
-	//Should it be really deep copy here??
 	tasks[tasksCount++] = task->clone();
 	task = nullptr;
 }

@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "GlobalConstants.h"
 #include <sstream>
 
 void Engine::start()
@@ -79,7 +78,6 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 	}
 	else if (strcmp(buff, "add-task") == 0)
 	{
-		// TODO handle the case when the due_date is optional...how to read it
 		char name[GlobalConstants::BUFF_SIZE];
 		char due_date_str[GlobalConstants::BUFF_SIZE];
 		char description[GlobalConstants::BUFF_SIZE];
@@ -153,9 +151,6 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 	}
 	else if (strcmp(buff, "get-task") == 0)
 	{
-		/*char identifier[GlobalConstants::BUFF_SIZE];
-		ss >> identifier;
-		handleGetTask(identifier);*/
 		User* currentUser = session.getCurrentUser();
 		if (currentUser)
 		{
@@ -382,7 +377,6 @@ void Engine::handleAddTask(const MyString& name, const MyString& description)
 
 void Engine::handleUpdateTaskName(unsigned id, const MyString& name)
 {
-	std::cout << id << name;
 	try
 	{
 		User* currentUser= session.getCurrentUser();
@@ -549,7 +543,6 @@ void Engine::handleFinishTask(unsigned id)
 void Engine::handleAddCollaboration(const MyString& name)
 {
 	session.addCollaboration(name);
-	std::cout << "Collaboration added successfully!" << std::endl;
 }
 
 void Engine::handleDeleteCollaboration(const MyString& name)

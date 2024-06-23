@@ -13,8 +13,6 @@ public:
 	const T& getValue() const;
 	T& getValue();
 	void reset();
-	/*bool operator==(const Optional<T>& other) const;
-	bool operator==(const T& value) const;*/
 private:
 	T data;
 	bool hasValue;
@@ -61,22 +59,3 @@ void Optional<T>::reset()
 	hasValue = false;
 	data = T();
 }
-
-//template <class T>
-//bool Optional<T>::operator==(const Optional<T>& other) const {
-//	if (hasValue != other.hasValue) {
-//		return false;
-//	}
-//	if (!hasValue) {
-//		return true;
-//	}
-//	return data == other.data;
-//}
-//
-//template <class T>
-//bool Optional<T>::operator==(const T& value) const {
-//	if (!hasValue) {
-//		return false;
-//	}
-//	return data == value;
-//}

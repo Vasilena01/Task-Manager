@@ -25,17 +25,6 @@ void Dashboard::addTask(Task* task)
 void Dashboard::removeTask(unsigned id)
 {
     tasks.removeTask(id);
-    //for (int i = 0; i < tasks.getSize(); i++)
-    //{
-    //    if (tasks[i] != nullptr && tasks[i]->getId() == id)
-    //    {
-    //        delete tasks[i];
-    //        // TODO da se opravi, uj tasks[i] bilo const...
-    //        //tasks[i] = nullptr;
-    //        return;
-    //    }
-    //}
-    //throw std::logic_error("Task not found in the dashboard!");
 }
 
 void Dashboard::listTasks()

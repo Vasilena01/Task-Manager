@@ -30,9 +30,6 @@
     <ClCompile Include="TasksCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DatePool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Dashboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -59,9 +56,6 @@
     <ClInclude Include="User.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Container.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Optional.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -77,22 +71,13 @@
     <ClInclude Include="TasksCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DatePool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Dashboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CollaborativeTask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SharedPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UniquePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GlobalConstants.h">

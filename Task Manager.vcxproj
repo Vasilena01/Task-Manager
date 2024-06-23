@@ -130,7 +130,6 @@
     <ClCompile Include="Collaboration.cpp" />
     <ClCompile Include="CollaborativeTask.cpp" />
     <ClCompile Include="Dashboard.cpp" />
-    <ClCompile Include="DatePool.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="GlobalFunctions.cpp" />
     <ClCompile Include="MyString.cpp" />
@@ -143,20 +142,16 @@
   <ItemGroup>
     <ClInclude Include="Collaboration.h" />
     <ClInclude Include="CollaborativeTask.h" />
-    <ClInclude Include="Container.hpp" />
     <ClInclude Include="Dashboard.h" />
-    <ClInclude Include="DatePool.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="GlobalFunctions.h" />
     <ClInclude Include="MyString.h" />
     <ClInclude Include="Optional.hpp" />
     <ClInclude Include="Session.h" />
-    <ClInclude Include="SharedPtr.hpp" />
     <ClInclude Include="Task.h" />
     <ClInclude Include="TasksCollection.h" />
     <ClInclude Include="TaskStatus.h" />
-    <ClInclude Include="UniquePtr.hpp" />
     <ClInclude Include="User.h" />
     <ClInclude Include="Vector.hpp" />
   </ItemGroup>
