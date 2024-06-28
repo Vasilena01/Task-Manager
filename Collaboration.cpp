@@ -95,7 +95,7 @@ void Collaboration::deleteTasksInCollaboration()
     {
         unsigned taskId = tasks[i]->getId();
         deleteTaskFromAllUsers(taskId);
-        tasks.removeTask(taskId);
+        deleteTaskFromCollaboration(taskId);
     }
 }
 

@@ -63,11 +63,16 @@ void TasksCollection::removeTask(unsigned id)
 {
 	bool isThereATaskToDelete = false;
 	for (size_t i = 0; i < tasksCount; i++) {
-		if (tasks[i] != nullptr && tasks[i]->getId() == id) {
+		if (tasks[i] != nullptr && tasks[i]->getId() == id)
+		{
 			delete tasks[i];
 			tasks[i] = nullptr;
-			tasksCount--;
-			isThereATaskToDelete = true;
+
+			for (size_t j = i; j < tasksCount - 1; j++)
+			{
+				tasks[j] = tasks[j + 1];
+			}
+			tasks[--tasksCount] = nullptr;
 			return;
 		}
 	}
