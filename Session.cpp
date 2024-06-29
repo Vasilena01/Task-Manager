@@ -39,8 +39,8 @@ Session& Session::operator=(Session&& other) noexcept
 
 Session::~Session() noexcept
 {
-	free();
 	exit();
+	free();
 }
 
 void Session::registerUser(const MyString& username, const MyString& password)

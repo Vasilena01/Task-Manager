@@ -67,7 +67,6 @@ void TasksCollection::removeTask(unsigned id)
 		{
 			delete tasks[i];
 			tasks[i] = nullptr;
-
 			for (size_t j = i; j < tasksCount - 1; j++)
 			{
 				tasks[j] = tasks[j + 1];

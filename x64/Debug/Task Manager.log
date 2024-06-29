@@ -1,12 +1,8 @@
-﻿  Engine.cpp
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Engine.cpp(166,33): warning C4101: 'e': unreferenced local variable
-  Session.cpp
+﻿  Session.cpp
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(116,25): warning C4101: 'e': unreferenced local variable
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(318,31): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(362,55): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  Task Manager.cpp
-  Generating Code...
-D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(551): warning C4715: 'Session::getCollaborationByName': not all control paths return a value
 D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(532): warning C4715: 'Session::getUserByUsername': not all control paths return a value
+D:\Projects\C++\Task Manager - OOP project\Task Manager\Session.cpp(551): warning C4715: 'Session::getCollaborationByName': not all control paths return a value
   Task Manager.vcxproj -> D:\Projects\C++\Task Manager - OOP project\Task Manager\x64\Debug\Task Manager.exe
