@@ -7,8 +7,39 @@ Session::Session()
 	loadCollaborations("collaborations.dat");
 }
 
-Session::~Session()
+Session::Session(const Session& other)
 {
+	copyFrom(other);
+}
+
+Session& Session::operator=(const Session& other)
+{
+	if (this != &other)
+	{
+		free();
+		copyFrom(other);
+	}
+	return *this;
+}
+
+Session::Session(Session&& other) noexcept
+{
+	moveFrom(std::move(other));
+}
+
+Session& Session::operator=(Session&& other) noexcept
+{
+	if (this != &other)
+	{
+		free();
+		moveFrom(std::move(other));
+	}
+	return *this;
+}
+
+Session::~Session() noexcept
+{
+	free();
 	exit();
 }
 
@@ -527,6 +558,50 @@ int Session::getCollabIndexById(unsigned id)
 			return i;
 	}
 	return -1;
+}
+
+void Session::copyFrom(const Session& other)
+{
+	currentUser = other.currentUser ? new User(*other.currentUser) : nullptr;
+
+	for (size_t i = 0; i < other.allUsers.getSize(); ++i)
+	{
+		allUsers.pushBack(new User(*other.allUsers[i]));
+	}
+
+	for (size_t i = 0; i < other.allCollaborations.getSize(); ++i)
+	{
+		allCollaborations.pushBack(new Collaboration(*other.allCollaborations[i]));
+	}
+
+	allTasks = other.allTasks;
+}
+
+void Session::moveFrom(Session&& other)
+{
+	currentUser = other.currentUser;
+	other.currentUser = nullptr;
+
+	allUsers = std::move(other.allUsers);
+	allCollaborations = std::move(other.allCollaborations);
+	allTasks = std::move(other.allTasks);
+}
+
+void Session::free()
+{
+	delete currentUser;
+
+	for (size_t i = 0; i < allUsers.getSize(); ++i)
+	{
+		delete allUsers[i];
+	}
+	allUsers.clear();
+
+	for (size_t i = 0; i < allCollaborations.getSize(); ++i)
+	{
+		delete allCollaborations[i];
+	}
+	allCollaborations.clear();
 }
 
 void Session::deleteTaskFromAllCollaborations(unsigned id)

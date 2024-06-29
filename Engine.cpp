@@ -101,8 +101,8 @@ void Engine::handleCommand(const MyString& command, bool& isRunning)
 		else
 		{
 			ss.clear();
-			ss.seekg(std::ios::beg); // Rewind to read everything after the name
-			ss.ignore(std::numeric_limits<std::streamsize>::max(), ' '); // Skip the command part
+			ss.seekg(std::ios::beg);
+			ss.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
 			ss.getline(description, sizeof(description));
 			handleAddTask(name, description);
 		}

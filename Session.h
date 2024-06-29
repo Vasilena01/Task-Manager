@@ -7,7 +7,13 @@ class Session
 {
 public:
 	Session();
-	~Session();
+	Session(const Session& other);
+	Session& operator=(const Session& other);
+
+	Session(Session&& other) noexcept;
+	Session& operator=(Session&& other) noexcept;
+
+	~Session() noexcept;
 
 	// User functionalities
 	void registerUser(const MyString& username, const MyString& password);
@@ -45,5 +51,9 @@ private:
 	Task* getTaskById(unsigned id);
 	Collaboration* getCollaborationByName(const MyString& name);
 	int getCollabIndexById(unsigned id);
+
+	void copyFrom(const Session& other);
+	void moveFrom(Session&& other);
+	void free();
 };
 
